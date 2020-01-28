@@ -14,12 +14,6 @@ void closeProgram(){
     }while(aok == 0);
 }
 
-BOOL stringCompare(char* c1, char* c2){
-    while(1){
-        
-    }
-}
-
 void printCommState(){
     printf("Baud Rate: %d, Parity: %d, Stop Bits: %d\n", dcb.BaudRate, dcb.Parity, dcb.StopBits);
 }
