@@ -37,7 +37,6 @@ void findDerivatives(){
 void gradDescent(double min_error, int max_iters){
     double curr_error = min_error+1;
     int counter = 0;
-    double t0,t1,t2;
     while(curr_error > min_error && counter < max_iters){
         counter++;
         findDerivatives();
