@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-double trnSet[25][3];                                 // Training Set Simuating f(x_1,x_2) = 3x_0 + 4x_1 + 1
+double trnSet[25][3];                                 // Training Set Simuating f(x, y) = 3x + 4y + 1
 int trnSetSize = (int)(sizeof(trnSet)/sizeof(double[3]));
 
 double theta_0, theta_1, theta_2;
