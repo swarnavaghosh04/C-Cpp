@@ -55,11 +55,11 @@ int MATRIX<T>::getLength() const{ return (rows * columns); }
 template<typename T>
 template<typename U>
 MATRIX<T> MATRIX<T>::operator+(MATRIX<U> m) const {
-    MATRIX<T>* mat = new MATRIX(rows, columns);
+    MATRIX<T> mat(rows, columns);
     for(int i = 0; i < this->getLength(); i++){
-        mat->set(i, ((T)(m.get(i)) + this->get(i)));
+        mat.set(i, ((T)(m.get(i)) + this->get(i)));
     }
-    return *mat;
+    return mat;
 }
 
 int main(int argv, char** argc){
