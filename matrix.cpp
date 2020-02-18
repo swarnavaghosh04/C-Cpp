@@ -63,8 +63,8 @@ MATRIX<T> MATRIX<T>::operator+(MATRIX<U> m) const {
 }
 
 int main(int argv, char** argc){
-    MATRIX<int>* mat1 = new MATRIX<int>(3, 5);
-    MATRIX<double>* mat2 = new MATRIX<double>(3, 5);
+    const MATRIX<int>* mat1 = new MATRIX<int>(3, 5);
+    const MATRIX<double>* mat2 = new MATRIX<double>(3, 5);
     for(int i = 0; i < 3; i++){
         for(int j = 0; j < 5; j++){
             mat1->set(i, j, 1);

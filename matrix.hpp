@@ -12,7 +12,7 @@ class MATRIX{
 		T get(int, int) const;      // Gets a value from the matrix
 		T get(int) const;      		// Gets a value from the matrix
 		void set(int, int, T) const;      // Sets a value in the matrix
-		void set(int, T) const;      		// Sets a value in the matrix
+		void set(int, T) const;      	  // Sets a value in the matrix
 		int getRows() const;     	// Returns the number of rows
 		int getColumns() const;  	// Returns the number of column
 		int getLength() const;   	// Retruns the total length of the matrix (rows x columns)
