@@ -5,26 +5,25 @@ template<typename T>
 class MATRIX{
 	
 	private:
-		int rows;
-		int columns;
-		int length;
-		mutable int iterCounter = 0;
-		mutable T* matrix;
+		int rows;                   // Number of rows in the matrix
+		int columns;                // number of columns in the matrix
+		int length;                 // number of rows x number of columns = total length of the matrix
+		T* matrix;                  // Pointer to the memory location where the actual matrix array is located
+		bool flag = 1;              // Whether matrix needs to be deleted by the destructor or not (determied by which constructor is being used)
+		int iterator = 0;           // Iterates throught the matrix. Resets once it reaches the length of the matrix
 	
 	public:
 		T get(int, int) const;      // Gets a value from the matrix from a position relative to the rows and columns
 		T get(int) const;      		// Gets a value from the matrix from a position relative to the length of the matrix (rows x columns)
-		T get() const;              // Gets value from the matrix from the poisition specified by the iterator
-		T iterate() const;          // iterates to the function and resets after reaching the ends
-		void set(int, int, T) const;      // Sets a value in the matrix at a specific location relative to rows and columns
-		void set(int, T) const;      	  // Sets a value in the matrix at a specific location relative to the total length (rows x columns)
-		void set(T) const;                // Sets a value in the matrix at a specific location relative to the iterator
+		void set(int, int, T);      // Sets a value in the matrix at a specific location relative to rows and columns
+		void set(int, T);      	    // Sets a value in the matrix at a specific location relative to the total length (rows x columns)
 		int getRows() const;     	// Returns the number of rows
 		int getColumns() const;  	// Returns the number of column
-		int getLength() const;   	// Retruns the total length of the matrix (rows x columns)
+		int getLength() const;   	// Returns the total length of the matrix (rows x columns)
 		template<typename U>
-		MATRIX<T> operator+(MATRIX<U>) const;   // Add matrices together
+		MATRIX<T> operator+(MATRIX<U>&) const;   // Add matrices together
 		MATRIX(int, int);        	// Constructor (takes in length and width of matrix)
+		MATRIX(int, int, T*);       //
 		~MATRIX();               	// Destructor (frees the memory)
 };
 
@@ -32,77 +31,52 @@ class MATRIX{
 
 // Matic Constructor ====
 template<typename T>
-MATRIX<T>::MATRIX(int rows, int columns) : rows(rows), columns(columns){
-    int size = sizeof(T);
-	length = rows*columns;
-    this->matrix = (T*)calloc(rows*columns, size);
-}
+MATRIX<T>::MATRIX(int rows, int columns) : 
+	rows(rows), 
+	columns(columns),
+	length(rows*columns)
+{ this->matrix = new T[length]; }
+
+template<typename T>
+MATRIX<T>::MATRIX(int rows, int columns, T* matrixPointer) :
+	rows(rows), 
+	columns(columns),
+	length(rows*columns),
+	matrix(matrixPointer),
+	flag(0)
+{}
 
 // Matrix Destrctor ======
 template<typename T>
 MATRIX<T>::~MATRIX(){
-    free(matrix);
+	if(flag){
+    	delete[] matrix;
+	}
 }
 
 // Get =====
 template<typename T>
 T MATRIX<T>::get(int i, int j) const{
-    matrix += (columns*i + j);
-    T val = *matrix;
-    matrix -= (columns*i + j);
-    return val;
+    return matrix[(columns*i)+j];
 }
 
 // Get =====
 template<typename T>
 T MATRIX<T>::get(int i) const{
-    matrix += i;
-    T val = *matrix;
-    matrix -= i;
-    return val;
+    return matrix[i];
 }
-
-// Get =======
-template<typename T>
-T MATRIX<T>::get()const{return *matrix;}
-
-// ===================== FIX THIS! =====================
-
-// Iterate ======
-template <typename T>
-T MATRIX<T>::iterate() const{
-	T num = *matrix;
-	iterCounter++;
-	matrix++;
-	if(iterCounter == length){
-		matrix -= iterCounter;
-		iterCounter = 0;
-		return num;
-	}
-	return num;
-}
-
-// ======================================================
 
 // Set =====
 template<typename T>
-void MATRIX<T>::set(int i, int j, T val) const{
-    matrix += (columns*i + j - iterCounter);
-    *matrix = val;
-    matrix -= (columns*i + j - iterCounter);
+void MATRIX<T>::set(int i, int j, T val) {
+    matrix[(columns*i)+j] = val;
 }
 
 // Set ====
 template<typename T>
-void MATRIX<T>::set(int i, T val) const{
-    matrix += i;
-    *matrix = val;
-    matrix -= i;
+void MATRIX<T>::set(int i, T val) {
+    matrix[i] = val;
 }
-
-// Set ====
-template<typename T>
-void MATRIX<T>::set(T val) const{*matrix = val;}
 
 // Get Rows ======
 template<typename T>
@@ -117,12 +91,13 @@ template<typename T>
 int MATRIX<T>::getLength() const{ return length; }
 
 // Operator+ =========
+
 template<typename T>
 template<typename U>
-MATRIX<T> MATRIX<T>::operator+(MATRIX<U> m) const {
+MATRIX<T> MATRIX<T>::operator+(MATRIX<U>& m) const {      // Argument needs to be a reference, or else local copy will affect the input matrix
     MATRIX<T> mat(rows, columns);
-    for(int i = 0; i < this->getLength(); i++){
-        mat.set(i, ((T)(m.iterate()) + this->iterate()));
+    for(int i = 0; i < getLength(); i++){
+        mat.set(i, (((T)m.get(i)) + this->get(i)));
     }
     return mat;
 }
