@@ -176,5 +176,4 @@ MATRIX<T> MATRIX<T>::operator*(U s) const {
 	for(int i = 0; i < length; i++){
 		mat.set(i, get(i)*(T)s);
 	}
-
 }
