@@ -1,3 +1,9 @@
+/*
+======= To do =========
+> Copy constructor
+=======================
+*/
+
 #pragma once
 #include <stdlib.h>
 #include <iostream>
@@ -34,6 +40,7 @@ class MATRIX{
 		int getRows() const;     	// Returns the number of rows
 		int getColumns() const;  	// Returns the number of column
 		int getLength() const;   	// Returns the total length of the matrix (rows x columns)
+		const T* getMatrix() const; // Returns the location of the matrix
 		// Operators ---------
 		TYPE_U MATRIX<T> operator+(const MATRIX<U>&) const;   // Add matrices
 		TYPE_U MATRIX<T> operator-(const MATRIX<U>&) const;   // Subtract matrices
@@ -107,6 +114,10 @@ int MATRIX<T>::getColumns() const{ return columns; }
 // Get Length ========
 TYPE_T
 int MATRIX<T>::getLength() const{ return length; }
+
+// Get Matrix
+TYPE_T
+const T* MATRIX<T>::getMatrix() const{ return matrix; }
 
 // Operator+ =========
 
