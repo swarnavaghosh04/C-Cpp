@@ -38,4 +38,10 @@ int main(int argv, char** argc){
 	std::cout << "Matrix 1 * Matrix 2:" << std::endl;
 	printMatrix(mat3);
 
+	mat3[2][1] = 8;
+
+	printMatrix(mat3);
+
+	std::cout << "Mat3[2][1] = " << mat3[2][1] << std::endl;
+
 }

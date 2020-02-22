@@ -1,6 +1,7 @@
 /*
 ======= To do =========
-> Copy constructor
+> Copy Constructor
+> Move Constructor
 =======================
 */
 
@@ -10,7 +11,7 @@
 #include <exception>
 
 #define TYPE_T template<typename T>
-#define TYPE_U template<typename U>
+#define TYPE_AB template<typename A, typename B>
 
 class DimensionException : public std::exception{
 	public:
@@ -30,31 +31,33 @@ class MATRIX{
 		bool flag = 1;              // Whether matrix needs to be deleted by the destructor or not (determied by which constructor is being used)
 	
 	public:
-		MATRIX(int, int);        	// Constructor (takes in length and width of matrix)
-		MATRIX(int, int, T*);       // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
-		~MATRIX();               	// Destructor (frees the memory)
-		T get(int, int) const;      // Gets a value from the matrix from a position relative to the rows and columns
-		T get(int) const;      		// Gets a value from the matrix from a position relative to the length of the matrix (rows x columns)
-		void set(int, int, T);      // Sets a value in the matrix at a specific location relative to rows and columns
-		void set(int, T);      	    // Sets a value in the matrix at a specific location relative to the total length (rows x columns)
-		int getRows() const;     	// Returns the number of rows
-		int getColumns() const;  	// Returns the number of column
-		int getLength() const;   	// Returns the total length of the matrix (rows x columns)
-		const T* getMatrix() const; // Returns the location of the matrix
+		MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
+		MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
+		~MATRIX();               	                     // Destructor (frees the memory)
+		T get(const int&, const int&) const;             // Gets a value from the matrix from a position relative to the rows and columns
+		T get(const int&) const;      		             // Gets a value from the matrix from a position relative to the length of the matrix (rows x columns)
+		void set(const int&, const int&, const T&);      // Sets a value in the matrix at a specific location relative to rows and columns
+		void set(const int&, const T&);      	         // Sets a value in the matrix at a specific location relative to the total length (rows x columns)
+		int getRows() const;     	    // Returns the number of rows
+		int getColumns() const;  	    // Returns the number of column
+		int getLength() const;   	    // Returns the total length of the matrix (rows x columns)
+		const T* getMatrix() const;     // Returns the location of the matrix
 		// Operators ---------
-		TYPE_U MATRIX<T> operator+(const MATRIX<U>&) const;   // Add matrices
-		TYPE_U MATRIX<T> operator-(const MATRIX<U>&) const;   // Subtract matrices
-		TYPE_U MATRIX<T> operator*(const MATRIX<U>&) const;   // Multiply matrices
-		TYPE_U MATRIX<T> operator/(const MATRIX<U>&) const;   // Divide Matrices
-		TYPE_U MATRIX<T> operator*(U) const;            // Scalar Multiplier
-		TYPE_U MATRIX<T> operator/(U) const;            // Scalar Divisor
+		T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
+		TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
+		TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
+		TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
+		TYPE_AB friend MATRIX<A> operator/(const MATRIX<A>&, const MATRIX<B>&);    // Divide Matrices
+		TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const B&);            // Scalar Multiplier
+		TYPE_AB friend MATRIX<A> operator*(const B&, const MATRIX<A>&);            // Scalar Multiplier
+		//TYPE_U friend MATRIX<T> operator/(const U&, const MATRIX<T>&);            // Scalar Divisor
 };
 
 // =========== Matrix Class =================
 
 // Matix Constructor ====
 TYPE_T
-MATRIX<T>::MATRIX(int rows, int columns) : 
+MATRIX<T>::MATRIX(const int& rows, const int& columns) : 
 	rows(rows), 
 	columns(columns),
 	length(rows*columns)
@@ -62,7 +65,7 @@ MATRIX<T>::MATRIX(int rows, int columns) :
 
 // Matrix Constructor ====
 TYPE_T
-MATRIX<T>::MATRIX(int rows, int columns, T* matrixPointer) :
+MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
 	rows(rows), 
 	columns(columns),
 	length(rows*columns),
@@ -81,25 +84,25 @@ MATRIX<T>::~MATRIX(){
 
 // Get =====
 TYPE_T
-T MATRIX<T>::get(int i, int j) const{
+T MATRIX<T>::get(const int& i, const int& j) const{
     return matrix[(columns*i)+j];
 }
 
 // Get =====
 TYPE_T
-T MATRIX<T>::get(int i) const{
+T MATRIX<T>::get(const int& i) const{
     return matrix[i];
 }
 
 // Set =====
 TYPE_T
-void MATRIX<T>::set(int i, int j, T val) {
+void MATRIX<T>::set(const int& i, const int& j, const T& val) {
     matrix[(columns*i)+j] = val;
 }
 
 // Set ====
 TYPE_T
-void MATRIX<T>::set(int i, T val) {
+void MATRIX<T>::set(const int& i, const T& val) {
     matrix[i] = val;
 }
 
@@ -119,61 +122,70 @@ int MATRIX<T>::getLength() const{ return length; }
 TYPE_T
 const T* MATRIX<T>::getMatrix() const{ return matrix; }
 
+// Operator- =========
+
+TYPE_T
+T* MATRIX<T>::operator[](unsigned int i) const{
+	return (T*)&(matrix[i*columns]);
+}
+
 // Operator+ =========
 
-TYPE_T TYPE_U
-MATRIX<T> MATRIX<T>::operator+(const MATRIX<U>& m) const {      // Argument needs to be a reference, or else local copy will affect the input matrix
-    if(m.getRows() != rows || m.getColumns() != columns){
+TYPE_AB
+MATRIX<A> operator+(const MATRIX<A>& m1, const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
+    if(m1.rows != m2.rows || m1.columns != m2.columns){
 		throw DimensionException();
 	}
-	MATRIX<T> mat(rows, columns);
-    for(int i = 0; i < getLength(); i++){
-        mat.set(i, (((T)m.get(i)) + this->get(i)));
+	MATRIX<A> mat(m1.rows, m1.columns);
+    for(int i = 0; i < m1.length; i++){
+        mat.matrix[i] = m1.matrix[i] + (A)(m2.matrix[i]);
     }
     return mat;
 }
 
 // Operator- ==========
 
-TYPE_T TYPE_U
-MATRIX<T> MATRIX<T>::operator-(const MATRIX<U>& m) const {      // Argument needs to be a reference, or else local copy will affect the input matrix
-    if(m.getRows() != rows || m.getColumns() != columns){
+TYPE_AB
+MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
+    if(m1.rows != m2.rows || m1.columns != m2.columns){
 		throw DimensionException();
 	}
-	MATRIX<T> mat(rows, columns);
-    for(int i = 0; i < getLength(); i++){
-        mat.set(i, (((T)m.get(i)) - this->get(i)));
+	MATRIX<A> mat(m1.rows, m1.columns);
+    for(int i = 0; i < m1.length; i++){
+        mat.matrix[i] = m1.matrix[i] - (A)(m2.matrix[i]);
     }
     return mat;
 }
 
 // Operator* =========
 
-TYPE_T TYPE_U
-MATRIX<T> MATRIX<T>::operator*(const MATRIX<U>& m) const {
-	if(columns != m.getRows()){
+TYPE_AB
+MATRIX<A> operator*(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
+	if(m1.columns != m2.rows){
 		throw DimensionException();
 	}
-	MATRIX<T> mat(rows, m.getColumns());
-	T temp = (T)0;
-	for(int i = 0; i < rows; i++){
-		for(int j = 0; j < m.getColumns(); j++){
-			for(int k = 0; k < columns; k++){
-				temp += (this->get(i, k))  *  ((T)m.get(k, j));
+	MATRIX<A> mat(m1.rows, m2.columns);
+	A temp = (A)0;
+	for(int i = 0; i < m1.rows; i++){
+		for(int j = 0; j < m2.columns; j++){
+			for(int k = 0; k < m1.columns; k++){
+				temp += m1[i][k]  *  (A)(m2[k][j]);
 			}
-			mat.set(i, j, temp);
-			temp = (T)0;
+			mat[i][j] =  temp;
+			temp = (A)0;
 		}
 	}
 	return mat;
 }
 
-// Operator* scalar =======
+// Scalar Multiplier
 
-TYPE_T TYPE_U
-MATRIX<T> MATRIX<T>::operator*(U s) const {
-	MATRIX<T> mat(rows, columns);
-	for(int i = 0; i < length; i++){
-		mat.set(i, get(i)*(T)s);
+TYPE_AB
+MATRIX<A> operator*(const MATRIX<A>& m, const B& c){
+	MATRIX<A> mat(m.rows, m.columns);
+	for(int i = 0; i < m.length; i++){
+		mat.matrix[i] = m.matrix[i] * (A)c;
 	}
+	return mat;
 }
+
