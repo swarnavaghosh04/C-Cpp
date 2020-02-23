@@ -10,7 +10,6 @@ typedef class Thing{
         void setY(const int& y){this->y = y;}
         Thing(const int& x, const int& y) : x(x), y(y) { std:: cout << "Constructed" << std::endl; }
         Thing(const Thing& T){ std::cout << "Copied" << std::endl; }
-        operator=()
         Thing(const Thing&& T){ std::cout << "Moved" << std::endl; }
         virtual ~Thing(){ std:: cout << "Destructed" << std::endl; }
 } THING, Thing;
