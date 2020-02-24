@@ -5,7 +5,13 @@
 =======================
 */
 
-#include <vector>
+/* =========== C++ Matrix Library ==============
+=============== By Swarnava Ghosh ==============
+
+MATRIX is a highly optimized stand-alone class that provides basic matrix operations.
+It has 
+
+*/
 
 #pragma once
 #include <stdlib.h>
@@ -14,9 +20,6 @@
 
 #define TYPE_T template<typename T>
 #define TYPE_AB template<typename A, typename B>
-
-#define SINGLE_CHAIN 0
-#define SEGREGATED 1
 
 class DimensionException : public std::exception{
 	public:
@@ -36,13 +39,8 @@ class MATRIX{
 		
 	public:
 		MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
-		MATRIX(const int&, const int&, const int&);      // 
 		MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
 		~MATRIX();               	                     // Destructor (frees the memory)
-		T get(const int&, const int&) const;             // Gets a value from the matrix from a position relative to the rows and columns
-		T get(const int&) const;      		             // Gets a value from the matrix from a position relative to the length of the matrix (rows x columns)
-		void set(const int&, const int&, const T&);      // Sets a value in the matrix at a specific location relative to rows and columns
-		void set(const int&, const T&);      	         // Sets a value in the matrix at a specific location relative to the total length (rows x columns)
 		int getRows() const;     	    // Returns the number of rows
 		int getColumns() const;  	    // Returns the number of column
 		int getLength() const;   	    // Returns the total length of the matrix (rows x columns)
@@ -52,15 +50,14 @@ class MATRIX{
 		TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
 		TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
 		TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
-		TYPE_AB friend MATRIX<A> operator/(const MATRIX<A>&, const MATRIX<B>&);    // Divide Matrices
 		TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const B&);            // Scalar Multiplier
 		TYPE_AB friend MATRIX<A> operator*(const B&, const MATRIX<A>&);            // Scalar Multiplier
-		//TYPE_U friend MATRIX<T> operator/(const U&, const MATRIX<T>&);            // Scalar Divisor
+		TYPE_AB friend MATRIX<A> operator/(const MATRIX<A>&, const B&);            // Scalar Divisor
 };
 
 // =========== Matrix Class =================
 
-// Matix Constructor ====
+// Matix Constructor (rows, columns) ====
 TYPE_T
 MATRIX<T>::MATRIX(const int& rows, const int& columns) : 
 	rows(rows), 
@@ -68,7 +65,7 @@ MATRIX<T>::MATRIX(const int& rows, const int& columns) :
 	length(rows*columns)
 { this->matrix = new T[length]; }
 
-// Matrix Constructor ====
+// Matrix Constructor (rows, columns, pointer to 1D heap allocated memory) ======
 TYPE_T
 MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
 	rows(rows), 
@@ -80,32 +77,8 @@ MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
 // Matrix Destrctor ======
 TYPE_T
 MATRIX<T>::~MATRIX(){
-    delete[] matrix;
+	delete[] matrix;
 	std::cout << "DESTROY" << std::endl;
-}
-
-// Get =====
-TYPE_T
-T MATRIX<T>::get(const int& i, const int& j) const{
-    return matrix[(columns*i)+j];
-}
-
-// Get =====
-TYPE_T
-T MATRIX<T>::get(const int& i) const{
-    return matrix[i];
-}
-
-// Set =====
-TYPE_T
-void MATRIX<T>::set(const int& i, const int& j, const T& val) {
-    matrix[(columns*i)+j] = val;
-}
-
-// Set ====
-TYPE_T
-void MATRIX<T>::set(const int& i, const T& val) {
-    matrix[i] = val;
 }
 
 // Get Rows ======
@@ -125,14 +98,10 @@ TYPE_T
 const T* MATRIX<T>::getMatrix() const{ return matrix; }
 
 // Operator- =========
-
 TYPE_T
-T* MATRIX<T>::operator[](unsigned int i) const{
-	return (T*)&(matrix[i*columns]);
-}
+T* MATRIX<T>::operator[](unsigned int i) const{ return (T*)&(matrix[i*columns]); }
 
 // Operator+ =========
-
 TYPE_AB
 MATRIX<A> operator+(const MATRIX<A>& m1, const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
     if(m1.rows != m2.rows || m1.columns != m2.columns){
@@ -146,7 +115,6 @@ MATRIX<A> operator+(const MATRIX<A>& m1, const MATRIX<B>& m2) {      // Argument
 }
 
 // Operator- ==========
-
 TYPE_AB
 MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
     if(m1.rows != m2.rows || m1.columns != m2.columns){
@@ -160,7 +128,6 @@ MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {      // Argumen
 }
 
 // Operator* =========
-
 TYPE_AB
 MATRIX<A> operator*(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
 	if(m1.columns != m2.rows){
@@ -181,7 +148,6 @@ MATRIX<A> operator*(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
 }
 
 // Scalar Multiplier
-
 TYPE_AB
 MATRIX<A> operator*(const MATRIX<A>& m, const B& c){
 	MATRIX<A> mat(m.rows, m.columns);

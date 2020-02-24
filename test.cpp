@@ -17,12 +17,6 @@ class Thing{
         virtual ~Thing(){ std:: cout << "Destructed: " << x << ", " << y << std::endl; }
 };
 
-int doSomething(){
-    int x = 9;
-    std::cout << &x << std::endl;
-    return x;
-}
-
 void printThing(const char* name, const Thing& t){
     std::cout << name << ": " << t.getX() << ", " << t.getY() << std::endl;
 }
@@ -31,13 +25,7 @@ int main(int argv, char** argc){
     Thing t1(4,3);
     Thing t2(5, 4);
     Thing t3(1, 3);
-    Thing t4 = t1+t2+t3;
-    Thing t5 = t4;
-
-    short y = 5;
-    std::cout << y << "\n";
-
-    std::cout << sizeof(short) << "\n";
+    t3 = t1+t2+t3;
 
     std::cout << "<=== END ===>" << std::endl;
     return 0;
