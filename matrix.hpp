@@ -147,7 +147,7 @@ MATRIX<A> operator*(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
 	return mat;
 }
 
-// Scalar Multiplier
+// Scalar Multiplier ========
 TYPE_AB
 MATRIX<A> operator*(const MATRIX<A>& m, const B& c){
 	MATRIX<A> mat(m.rows, m.columns);
@@ -156,4 +156,7 @@ MATRIX<A> operator*(const MATRIX<A>& m, const B& c){
 	}
 	return mat;
 }
+
+TYPE_AB
+MATRIX<A> operator*(const B& c, const MATRIX<A>& m){ return m*c; }
 
