@@ -9,7 +9,6 @@
 =============== By Swarnava Ghosh ==============
 
 MATRIX is a highly optimized stand-alone class that provides basic matrix operations.
-It has 
 
 */
 
@@ -41,10 +40,11 @@ class MATRIX{
 		MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
 		MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
 		~MATRIX();               	                     // Destructor (frees the memory)
-		int getRows() const;     	    // Returns the number of rows
-		int getColumns() const;  	    // Returns the number of column
-		int getLength() const;   	    // Returns the total length of the matrix (rows x columns)
-		const T* getMatrix() const;     // Returns the location of the matrix
+		int getRows() const;     	        // Returns the number of rows
+		int getColumns() const;  	        // Returns the number of column
+		int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
+		const T* getMatrix() const;         // Returns the location of the matrix
+		void fillMatrix(T (*)(int,int));    // Fills The matrix with 
 		// Operators ---------
 		T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
 		TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices

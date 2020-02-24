@@ -25,7 +25,9 @@ int main(int argv, char** argc){
     Thing t1(4,3);
     Thing t2(5, 4);
     Thing t3(1, 3);
-    t3 = t1+t2+t3;
+    Thing t4 = t1+t2+t3;   // Nothing
+    t3 = t4+t2;            // Move
+    t2 = t1;               // Assigned
 
     std::cout << "<=== END ===>" << std::endl;
     return 0;
