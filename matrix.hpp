@@ -5,6 +5,8 @@
 =======================
 */
 
+#include <vector>
+
 #pragma once
 #include <stdlib.h>
 #include <iostream>
@@ -12,6 +14,9 @@
 
 #define TYPE_T template<typename T>
 #define TYPE_AB template<typename A, typename B>
+
+#define SINGLE_CHAIN 0
+#define SEGREGATED 1
 
 class DimensionException : public std::exception{
 	public:
@@ -28,10 +33,10 @@ class MATRIX{
 		int columns;                // number of columns in the matrix
 		int length;                 // number of rows x number of columns = total length of the matrix
 		T* matrix;                  // Pointer to the memory location where the actual matrix array is located
-		bool flag = 1;              // Whether matrix needs to be deleted by the destructor or not (determied by which constructor is being used)
-	
+		
 	public:
 		MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
+		MATRIX(const int&, const int&, const int&);      // 
 		MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
 		~MATRIX();               	                     // Destructor (frees the memory)
 		T get(const int&, const int&) const;             // Gets a value from the matrix from a position relative to the rows and columns
@@ -70,16 +75,13 @@ MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
 	columns(columns),
 	length(rows*columns),
 	matrix(matrixPointer),
-	flag(0)
 {}
 
 // Matrix Destrctor ======
 TYPE_T
 MATRIX<T>::~MATRIX(){
-	if(flag){
-    	delete[] matrix;
-		std::cout << "DESTROY" << std::endl;
-	}
+    delete[] matrix;
+	std::cout << "DESTROY" << std::endl;
 }
 
 // Get =====
