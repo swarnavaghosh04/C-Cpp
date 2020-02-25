@@ -71,7 +71,7 @@ MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
 	rows(rows), 
 	columns(columns),
 	length(rows*columns),
-	matrix(matrixPointer),
+	matrix(matrixPointer)
 {}
 
 // Matrix Destrctor ======
