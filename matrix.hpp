@@ -47,7 +47,7 @@ class MATRIX{
 		int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
 		const T* getMatrix() const;         // Returns the location of the matrix
 		void fillMatrix(FillFunction);      // Fills The matrix with a pattern based off of position
-		// Operators ---------
+		// Arithmatic Operators ---------
 		T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
 		TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
 		TYPE_U void operator=(const MATRIX<U>&&);                                  // Move operator
@@ -58,8 +58,9 @@ class MATRIX{
 		TYPE_AB friend MATRIX<A> operator*(const A&, const MATRIX<B>&);            // Scalar Multiplier
 		TYPE_AB friend MATRIX<A> operator/(const MATRIX<B>&, const A&);            // Scalar Divisor
 		TYPE_AB friend MATRIX<A> operator/(const A&, const MATRIX<B>&);            // Scalar Divisor
-		TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Comparison Operator
-		TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);
+		// Comparison Operators ----------
+		TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
+		TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
 };
 
 // =========== Matrix Class =================
