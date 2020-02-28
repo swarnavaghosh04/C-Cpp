@@ -20,7 +20,6 @@ MATRIX is a highly optimized stand-alone class that provides basic matrix operat
 #define TYPE_U template<typename U>
 #define TYPE_AB template<typename A, typename B>
 
-
 typedef const int& index;
 
 namespace sg{
@@ -31,7 +30,6 @@ namespace sg{
                 return "The dimensions of the matrices are not compatible with the specified operation";
             }
     };
-
 
     TYPE_T
     class MATRIX final{
