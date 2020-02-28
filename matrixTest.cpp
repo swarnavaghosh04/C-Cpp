@@ -31,4 +31,8 @@ int main(int argv, char** argc){
 	std::cout << "Matrix 1 * Matrix 2:" << std::endl;
 	printMatrix(mat3);
 
+	typedef double (*_func)(int, int, double);
+
+	std::cout << '\n' << sizeof(MATRIX<double>) << '\n' << std::endl;
+
 }

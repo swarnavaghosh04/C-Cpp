@@ -13,7 +13,6 @@ MATRIX is a highly optimized stand-alone class that provides basic matrix operat
 */
 
 #pragma once
-//#include <stdlib.h>
 #include <iostream>
 #include <exception>
 
@@ -32,11 +31,12 @@ TYPE_T
 class MATRIX{
 	
 	private:
-		int rows;                   // Number of rows in the matrix
-		int columns;                // number of columns in the matrix
-		int length;                 // number of rows x number of columns = total length of the matrix
-		T* matrix;                  // Pointer to the memory location where the actual matrix array is located
-		typedef T (*FillFunction)(const int&, const int&);
+		int rows;                        // Number of rows in the matrix
+		int columns;                     // number of columns in the matrix
+		int length;                      // number of rows x number of columns = total length of the matrix
+		T* matrix;                       // Pointer to the memory location where the actual matrix array is located
+		mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
+		typedef T (*FillFunction)(const int&, const int&);   // Used as argument type for 'fillMatrix' function
 	public:
 		MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
 		MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
@@ -46,17 +46,20 @@ class MATRIX{
 		int getColumns() const;  	        // Returns the number of column
 		int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
 		const T* getMatrix() const;         // Returns the location of the matrix
-		void fillMatrix(FillFunction);          // Fills The matrix with a pattern based off of position
+		void fillMatrix(FillFunction);      // Fills The matrix with a pattern based off of position
 		// Operators ---------
 		T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
-		TYPE_U void operator=(const MATRIX<U>&);
-		TYPE_U void operator=(const MATRIX<U>&&);
+		TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
+		TYPE_U void operator=(const MATRIX<U>&&);                                  // Move operator
 		TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
 		TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
 		TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
-		TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const B&);            // Scalar Multiplier
-		TYPE_AB friend MATRIX<A> operator*(const B&, const MATRIX<A>&);            // Scalar Multiplier
-		TYPE_AB friend MATRIX<A> operator/(const MATRIX<A>&, const B&);            // Scalar Divisor
+		TYPE_AB friend MATRIX<A> operator*(const MATRIX<B>&, const A&);            // Scalar Multiplier
+		TYPE_AB friend MATRIX<A> operator*(const A&, const MATRIX<B>&);            // Scalar Multiplier
+		TYPE_AB friend MATRIX<A> operator/(const MATRIX<B>&, const A&);            // Scalar Divisor
+		TYPE_AB friend MATRIX<A> operator/(const A&, const MATRIX<B>&);            // Scalar Divisor
+		TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Comparison Operator
+		TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);
 };
 
 // =========== Matrix Class =================
@@ -78,7 +81,7 @@ MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
 	matrix(matrixPointer)
 {}
 
-// Copy Constructor (allocates new memory and copies matrix) ====================
+// Copy Constructor (allocates new memory and copies matrix; performs deep copy) ====================
 TYPE_T
 MATRIX<T>::MATRIX(const MATRIX<T>& mat) : 
 	rows(mat.rows),
@@ -92,7 +95,7 @@ MATRIX<T>::MATRIX(const MATRIX<T>& mat) :
 // Matrix Destrctor ======
 TYPE_T
 MATRIX<T>::~MATRIX(){
-	delete[] matrix;
+	if(canDelete) delete[] matrix;
 	std::cout << "DESTROY" << std::endl;
 }
 
@@ -137,7 +140,8 @@ TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>&& mat){
 	this->rows = mat.rows;
 	this->columns = mat.columns;
 	this->length = mat.length;
-	for(int i = 0; i < length; i++) this->matrix[i] = mat.matrix[i];
+	mat.canDelete = false;
+	this->matrix = mat.matrix;
 }
 
 // Operator+ =========
@@ -188,14 +192,30 @@ MATRIX<A> operator*(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
 
 // Scalar Multiplier ========
 TYPE_AB
-MATRIX<A> operator*(const MATRIX<A>& m, const B& c){
+MATRIX<A> operator*(const MATRIX<B>& m, const A& c){
 	MATRIX<A> mat(m.rows, m.columns);
-	for(int i = 0; i < m.length; i++){
-		mat.matrix[i] = m.matrix[i] * (A)c;
-	}
+	for(int i = 0; i < m.length; i++) mat.matrix[i] = (A)m.matrix[i] * c;
 	return mat;
 }
 
 TYPE_AB
-MATRIX<A> operator*(const B& c, const MATRIX<A>& m){ return m*c; }
+MATRIX<A> operator*(const A& c, const MATRIX<B>& m){
+	MATRIX<A> mat(m.rows, m.columns);
+	for(int i = 0; i < m.length; i++) mat.matrix[i] = (A)m.matrix[i] * c;
+	return mat;
+}
 
+// Scalar Divisor ============
+TYPE_AB
+MATRIX<A> operator/(const MATRIX<B>& m, const A& c){
+	MATRIX<A> mat(m.rows, m.columns);
+	for(int i = 0; i < m.length; i++) mat.matrix[i] = (A)m.matrix[i] / c;
+	return mat;
+}
+
+TYPE_AB
+MATRIX<A> operator/(const A& c, const MATRIX<B>& m){
+	MATRIX<A> mat(m.rows, m.columns);
+	for(int i = 0; i < m.length; i++) mat.matrix[i] = c / (A)m.matrix[i];
+	return mat;
+}
