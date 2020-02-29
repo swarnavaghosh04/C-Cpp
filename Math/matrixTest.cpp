@@ -14,8 +14,8 @@ int main(int argv, char** argc){
 
     sg::MATRIX<int> mat1(3, 4);
     sg::MATRIX<int> mat2(4, 3);
-    mat1.fillMatrix([](index i, index j){return i+j;});
-    mat2.fillMatrix([](const int& i, const int& j){return i*j;});
+    mat1.fill([](m_index i, m_index j){return i+j;});
+    mat2.fill(5);
 
     mat1 = 3*mat1;
     sg::MATRIX<int> mat3 = mat1*mat2;
@@ -31,8 +31,6 @@ int main(int argv, char** argc){
     std::cout << "Matrix 1 * Matrix 2:" << std::endl;
     printMatrix(mat3);
 
-    typedef double (*_func)(int, int, double);
-
-    std::cout << '\n' << sizeof(sg::MATRIX<double>) << '\n' << std::endl;
+    return 0;
 
 }

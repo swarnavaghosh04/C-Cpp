@@ -17,11 +17,27 @@ class Thing{
         virtual ~Thing(){ std::cout << "Destructed: " << x << ", " << y << " @ " << this << std::endl; }
 };
 
+class Num{
+    private:
+        int n;
+        short q;
+    public:
+        Num(int n=0, short q=0) : n(n), q(q) {}
+        operator int(){return n;}
+        Num operator+(Num other) { return Num(n+other.n); }
+        Num& operator+=(Num other) {
+            n += other.n;
+            return (*this);
+        }
+};
+
 void printThing(const char* name, const Thing& t){
     std::cout << name << ": " << t.getX() << ", " << t.getY() << std::endl;
 }
 
 int main(int argv, char** argc){
+
+    #if 0
     Thing t1(4,3);
     Thing t2(5, 4);
     Thing t3(1, 3);
@@ -37,7 +53,6 @@ int main(int argv, char** argc){
 
     std::cout << "4\n";
     t1 = t1;
-
-    std::cout << "<=== END ===>" << std::endl;
+    #endif
     return 0;
 }

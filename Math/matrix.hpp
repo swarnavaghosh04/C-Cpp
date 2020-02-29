@@ -1,26 +1,17 @@
-/*
-======= To do =========
-> Copy Constructor
-> Move Constructor
-=======================
-*/
 
-/* =========== C++ Matrix Library ==============
-=============== By Swarnava Ghosh ==============
-
-MATRIX is a highly optimized stand-alone class that provides basic matrix operations.
-
+/* 
+================== C++ Matrix Library ==================
+================== By Swarnava Ghosh ===================
 */
 
 #pragma once
-#include <iostream>
 #include <exception>
 
 #define TYPE_T template<typename T>
 #define TYPE_U template<typename U>
 #define TYPE_AB template<typename A, typename B>
 
-typedef const int& index;
+typedef const int& m_index;      // Useful for 'fill' function call
 
 namespace sg{
 
@@ -39,7 +30,7 @@ namespace sg{
             int length;                      // number of rows x number of columns = total length of the matrix
             T* matrix;                       // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
-            typedef T (*FillFunction)(index, index);   // Used as argument type for 'fillMatrix' function
+            typedef T (*FillFunction)(m_index, m_index);   // Used as argument type for 'fill' function
         public:
             MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
             MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
@@ -49,19 +40,24 @@ namespace sg{
             int getColumns() const;  	        // Returns the number of column
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
-            void fillMatrix(FillFunction);      // Fills The matrix with a pattern based off of position
+            void fill(FillFunction);            // Fills The matrix with a pattern based off of position
+            void fill(const T&);                // Fill the entire matrix with a single value
             // Arithmatic Operators ---------
             T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
             TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
             TYPE_U void operator=(const MATRIX<U>&&);                                  // Move operator
             TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
+            TYPE_U void operator+=(const MATRIX<U>&);                                  // Add matricex to this one
             TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
+            TYPE_U void operator-=(const MATRIX<U>&);                                  // Subtract matrix from this one
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<B>&, const A&);            // Scalar Multiplier
             TYPE_AB friend MATRIX<A> operator*(const A&, const MATRIX<B>&);            // Scalar Multiplier
             TYPE_AB friend MATRIX<A> operator/(const MATRIX<B>&, const A&);            // Scalar Divisor
             TYPE_AB friend MATRIX<A> operator/(const A&, const MATRIX<B>&);            // Scalar Divisor
-            TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Comparison operator (equals)
+            // Comparison Operators ---------
+            TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
+            TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
     };
 
     // =========== Matrix Class =================
@@ -91,14 +87,13 @@ namespace sg{
         length(mat.length)
     {
         matrix = new T[length];
-        for(int i = 0; i< length; i++) matrix[i] = mat.matrix[i];
+        for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
     }
 
     // Matrix Destrctor ======
     TYPE_T
     MATRIX<T>::~MATRIX(){
         if(canDelete) delete[] matrix;
-        std::cout << "DESTROY" << std::endl;
     }
 
     // Get Rows ======
@@ -119,11 +114,19 @@ namespace sg{
 
     // Fill matrix ==========
     TYPE_T
-    void MATRIX<T>::fillMatrix(FillFunction func){
+    void MATRIX<T>::fill(FillFunction func){
         for(int i = 0; i < rows; i++)
             for(int j = 0; j < columns; j++)
                 (*this)[i][j] = func(i, j);
     }
+
+    // Fill matrix ==============
+    TYPE_T
+    void MATRIX<T>::fill(const T& val){
+        for(int i = 0; i < length; i++) matrix[i] = val;
+    }
+
+    // Arithmatic Operators =====================
 
     // Operator[] =========
     TYPE_T
@@ -131,19 +134,22 @@ namespace sg{
 
     // Operator= (assign) =========
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>& mat){
-        this->rows = mat.rows;
-        this->columns = mat.columns;
-        this->length = mat.length;
-        for(int i = 0; i < length; i++) this->matrix[i] = mat.matrix[i];
+        rows = mat.rows;
+        columns = mat.columns;
+        length = mat.length;
+        for(int i = 0; i < length; i++) matrix[i] = (T)mat.matrix[i];
     }
 
     // Operator= (move) ===========
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>&& mat){
-        this->rows = mat.rows;
-        this->columns = mat.columns;
-        this->length = mat.length;
+        rows = mat.rows;
+        columns = mat.columns;
+        length = mat.length;
         mat.canDelete = false;
-        this->matrix = mat.matrix;
+        delete[] matrix;
+        matrix = mat.matrix;
+        if(!std::is_same<T, U>::value)
+            for(int i = 0; i < length; i++) matrix[i] = (T)matrix[i];
     }
 
     // Operator+ =========
@@ -159,6 +165,15 @@ namespace sg{
         return mat;
     }
 
+    // Operator+= =========
+    TYPE_T TYPE_U
+    void MATRIX<T>::operator+=(const MATRIX<U>& mat){
+        if(rows != mat.rows || columns != mat.columns){
+            throw DimensionException();
+        }
+        for(int i = 0; i < length; i++) matrix[i] += mat.matrix[i];
+    }
+
     // Operator- ==========
     TYPE_AB
     MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
@@ -170,6 +185,15 @@ namespace sg{
             mat.matrix[i] = m1.matrix[i] - (A)(m2.matrix[i]);
         }
         return mat;
+    }
+
+    // Operator-= =========
+    TYPE_T TYPE_U
+    void MATRIX<T>::operator-=(const MATRIX<U>& mat){
+        if(rows != mat.rows || columns != mat.columns){
+            throw DimensionException();
+        }
+        for(int i = 0; i < length; i++) matrix[i] -= mat.matrix[i];
     }
 
     // Operator* =========
@@ -222,11 +246,20 @@ namespace sg{
         return mat;
     }
 
-    // Comparison Operator ============
+    // Comparison operators ======================
+
+    // Equals ============
     TYPE_AB bool operator==(const MATRIX<A>& matA, const MATRIX<B>& matB){
         if(matA.rows != matB.rows || matA.columns != matB.columns) return false;
         for(int i = 0; i < matA.length; i++)
             if(matA.matrix[i] != (A)matB.matrix[i]) return false;
         return true;
     }
+
+    // Not Euals ===========
+    TYPE_AB bool operator!=(const MATRIX<A>& matA, const MATRIX<B>& matB){
+        return !(matA==matB);
+    }
+
+    
 }
