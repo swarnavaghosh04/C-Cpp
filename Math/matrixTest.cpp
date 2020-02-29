@@ -32,5 +32,4 @@ int main(int argv, char** argc){
     printMatrix(mat3);
 
     return 0;
-
 }

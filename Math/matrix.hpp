@@ -1,5 +1,5 @@
 
-/* 
+/*
 ================== C++ Matrix Library ==================
 ================== By Swarnava Ghosh ===================
 */
@@ -256,7 +256,7 @@ namespace sg{
         return true;
     }
 
-    // Not Euals ===========
+    // Not Equals ===========
     TYPE_AB bool operator!=(const MATRIX<A>& matA, const MATRIX<B>& matB){
         return !(matA==matB);
     }
