@@ -1,7 +1,9 @@
 #include <iostream>
 #include "matrix.hpp"
 
-void printMatrix(const math::MATRIX<int>& m){
+typedef math::MATRIX<int> MAT;
+
+void printMatrix(const MAT& m){
     for(int i = 0; i < m.getRows(); i++){
         for(int j = 0; j < m.getColumns(); j++){
             printf("%-6d", m[i][j]);
@@ -10,20 +12,12 @@ void printMatrix(const math::MATRIX<int>& m){
     }
 }
 
-typedef math::MATRIX<int> MAT;
-
-MAT thisThing(){
-    MAT mat = {5, 5};
-    std::cout << "Func: " << &mat << ", "<< mat.getMatrix() << std::endl;
-    mat.fill(5);
-    return mat;
-}
-
 int main(int argv, char** argc){
-    MAT thisMat;
-    thisMat = thisThing();
-    std::cout << "Main: " << &thisMat << ", " << thisMat.getMatrix() << std::endl;
-    thisMat = thisMat * 3;
-    printMatrix(thisMat);
-    std::cout << "Main: " << &thisMat << ", " << thisMat.getMatrix() << std::endl;
+    MAT mat1(3, 4);
+    MAT mat2(3, 4);
+    MAT mat3 = mat1*mat2;
+    
+    printMatrix(mat3);
+
+    std::cout << "<=======END=======>" << std::endl;
 }

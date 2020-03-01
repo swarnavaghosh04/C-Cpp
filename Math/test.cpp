@@ -45,6 +45,7 @@ void printThing(const char* name, const Thing& t){
 
 AnotherThing thisThing(){
     AnotherThing t = 5;
+    throw 1;
     std::cout << "Func: " << &t << std::endl;
     return t;
 }
@@ -77,7 +78,11 @@ int main(int argv, char** argc){
     std::cout << (int)n << std::endl;
     #endif
 
-    std::cout << sizeof(Num) << std::endl;
+    try {AnotherThing at = thisThing();}
+    catch(int val){
+        std::cout << val << std::endl;
+    }
+\
 
     return 0;
 }
