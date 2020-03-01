@@ -17,13 +17,21 @@ class Thing{
         virtual ~Thing(){ std::cout << "Destructed: " << x << ", " << y << " @ " << this << std::endl; }
 };
 
+class AnotherThing{
+    private:
+        int x;
+    public:
+        AnotherThing(int x = 0) : x(x) {}
+};
+
 class Num{
     private:
-        int n;
+        short n;
         short q;
     public:
-        Num(int n=0, short q=0) : n(n), q(q) {}
-        operator int(){return n;}
+        Num(short n=0, short q=0) : n(n), q(q) {}
+        ~Num(){std::cout << "DEST" << std::endl;}
+        operator short(){return n;}
         Num operator+(Num other) { return Num(n+other.n); }
         Num& operator+=(Num other) {
             n += other.n;
@@ -35,9 +43,16 @@ void printThing(const char* name, const Thing& t){
     std::cout << name << ": " << t.getX() << ", " << t.getY() << std::endl;
 }
 
+AnotherThing thisThing(){
+    AnotherThing t = 5;
+    std::cout << "Func: " << &t << std::endl;
+    return t;
+}
+
 int main(int argv, char** argc){
 
     #if 0
+
     Thing t1(4,3);
     Thing t2(5, 4);
     Thing t3(1, 3);
@@ -51,8 +66,18 @@ int main(int argv, char** argc){
     std::cout << "3\n";
     t2 = t1;                 // Assigned
 
-    std::cout << "4\n";
-    t1 = t1;
+    Num n(0);
+    std::cout << &n << std::endl;
+    
+    {
+        Num& q = n+=5;
+        std::cout << &q << std::endl;
+    }
+
+    std::cout << (int)n << std::endl;
     #endif
+
+    std::cout << sizeof(Num) << std::endl;
+
     return 0;
 }

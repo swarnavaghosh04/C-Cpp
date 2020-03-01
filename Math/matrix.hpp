@@ -4,7 +4,10 @@
 ================== By Swarnava Ghosh ===================
 */
 
-#pragma once
+#ifndef LIB_MATRIX_H
+#define LIB_MATRIX_H
+
+#include <iostream>
 #include <exception>
 
 #define TYPE_T template<typename T>
@@ -13,7 +16,7 @@
 
 typedef const int& m_index;      // Useful for 'fill' function call
 
-namespace sg{
+namespace math{
 
     class DimensionException : public std::exception{
         public:
@@ -32,7 +35,7 @@ namespace sg{
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
             typedef T (*FillFunction)(m_index, m_index);   // Used as argument type for 'fill' function
         public:
-            MATRIX(const int&, const int&);        	         // Constructor (takes in length and width of matrix)
+            MATRIX(const int& = 0, const int& = 0);          // Constructor (takes in length and width of matrix)
             MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
             MATRIX(const MATRIX<T>&);                        // Copy Constructor (allocates new memory and copies matrix)
             ~MATRIX();               	                     // Destructor (frees the memory)
@@ -47,9 +50,9 @@ namespace sg{
             TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
             TYPE_U void operator=(const MATRIX<U>&&);                                  // Move operator
             TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
-            TYPE_U void operator+=(const MATRIX<U>&);                                  // Add matricex to this one
+            TYPE_U MATRIX<T>& operator+=(const MATRIX<U>&);                                  // Add matricex to this one
             TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
-            TYPE_U void operator-=(const MATRIX<U>&);                                  // Subtract matrix from this one
+            TYPE_U MATRIX<T>& operator-=(const MATRIX<U>&);                                  // Subtract matrix from this one
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<B>&, const A&);            // Scalar Multiplier
             TYPE_AB friend MATRIX<A> operator*(const A&, const MATRIX<B>&);            // Scalar Multiplier
@@ -68,7 +71,7 @@ namespace sg{
         rows(rows), 
         columns(columns),
         length(rows*columns)
-    { matrix = new T[length]; }
+    { matrix = new T[length]; std::cout << "CONSTRUCT" << std::endl; }
 
     // Matrix Constructor (rows, columns, pointer to 1D heap allocated memory) ======
     TYPE_T
@@ -77,7 +80,7 @@ namespace sg{
         columns(columns),
         length(rows*columns),
         matrix(matrixPointer)
-    {}
+    { std::cout << "CONSTRUCT" << std::endl; }
 
     // Copy Constructor (allocates new memory and copies matrix; performs deep copy) ====================
     TYPE_T
@@ -86,6 +89,7 @@ namespace sg{
         columns(mat.columns),
         length(mat.length)
     {
+        std::cout << "COPY" << std::endl;
         matrix = new T[length];
         for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
     }
@@ -93,7 +97,10 @@ namespace sg{
     // Matrix Destrctor ======
     TYPE_T
     MATRIX<T>::~MATRIX(){
-        if(canDelete) delete[] matrix;
+        if(canDelete) { 
+            delete[] matrix;
+            std::cout << "DESTROYED" <<std::endl;
+        }
     }
 
     // Get Rows ======
@@ -134,6 +141,7 @@ namespace sg{
 
     // Operator= (assign) =========
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>& mat){
+        std::cout << "ASSIGN" << std::endl;
         rows = mat.rows;
         columns = mat.columns;
         length = mat.length;
@@ -142,6 +150,7 @@ namespace sg{
 
     // Operator= (move) ===========
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>&& mat){
+        std::cout << "MOVE" << std::endl;
         rows = mat.rows;
         columns = mat.columns;
         length = mat.length;
@@ -167,11 +176,12 @@ namespace sg{
 
     // Operator+= =========
     TYPE_T TYPE_U
-    void MATRIX<T>::operator+=(const MATRIX<U>& mat){
+    MATRIX<T>& MATRIX<T>::operator+=(const MATRIX<U>& mat){
         if(rows != mat.rows || columns != mat.columns){
             throw DimensionException();
         }
-        for(int i = 0; i < length; i++) matrix[i] += mat.matrix[i];
+        for(int i = 0; i < length; i++) matrix[i] += (T)mat.matrix[i];
+        retrun (*this);
     }
 
     // Operator- ==========
@@ -189,11 +199,12 @@ namespace sg{
 
     // Operator-= =========
     TYPE_T TYPE_U
-    void MATRIX<T>::operator-=(const MATRIX<U>& mat){
+    MATRIX<T>& MATRIX<T>::operator-=(const MATRIX<U>& mat){
         if(rows != mat.rows || columns != mat.columns){
             throw DimensionException();
         }
-        for(int i = 0; i < length; i++) matrix[i] -= mat.matrix[i];
+        for(int i = 0; i < length; i++) matrix[i] -= (T)mat.matrix[i];
+        retrun (*this);
     }
 
     // Operator* =========
@@ -263,3 +274,5 @@ namespace sg{
 
     
 }
+
+#endif
