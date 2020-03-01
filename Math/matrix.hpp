@@ -26,25 +26,24 @@ namespace math{
     };
 
     TYPE_T
-    class MATRIX final{
+    class MATRIX final{                      // Template class; Cannot be inherited from
         private:
             int rows;                        // Number of rows in the matrix
-            int columns;                     // number of columns in the matrix
-            int length;                      // number of rows x number of columns = total length of the matrix
+            int columns;                     // Number of columns in the matrix
+            int length;                      // Number of rows x number of columns = total length of the matrix
             T* matrix;                       // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
-            typedef T (*FillFunction)(m_index, m_index);   // Used as argument type for 'fill' function
+            typedef T (*FillFunction)(m_index, m_index);     // Used as argument type for 'fill' function
         public:
             MATRIX(const int& = 0, const int& = 0);          // Constructor (takes in length and width of matrix)
-            MATRIX(const int&, const int&, T* const);        // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
+            MATRIX(const int&, const int&, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
             MATRIX(const MATRIX<T>&);                        // Copy Constructor (allocates new memory and copies matrix)
             ~MATRIX();               	                     // Destructor (frees the memory)
+            // Getters ---------------
             int getRows() const;     	        // Returns the number of rows
             int getColumns() const;  	        // Returns the number of column
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
-            void fill(FillFunction);            // Fills The matrix with a pattern based off of position
-            void fill(const T&);                // Fill the entire matrix with a single value
             // Arithmatic Operators ---------
             T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
             TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
@@ -61,11 +60,17 @@ namespace math{
             // Comparison Operators ---------
             TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
             TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
+            // Other functions ------------
+            void fill(FillFunction);            // Fills The matrix with a pattern based off of position
+            void fill(const T&);                // Fill the entire matrix with a single value
     };
 
     // =========== Matrix Class =================
 
-    // Matix Constructor (rows, columns)
+    /* Matix Constructor (rows, columns):
+    This constructor is very simple. It just takes
+    in the dimensions of the matrix and dynamically
+    allocates that much space. */
     TYPE_T
     MATRIX<T>::MATRIX(const int& rows, const int& columns) : 
         rows(rows), 
@@ -73,16 +78,21 @@ namespace math{
         length(rows*columns)
     { matrix = new T[length]; std::cout << "CONSTRUCT" << std::endl; }
 
-    // Matrix Constructor (rows, columns, pointer to 1D heap allocated memory)
+    /* Matrix Constructor (rows, columns, pointer to 1D heap allocated memory)
+    This constructor not only takes in the dimensions of the matrix, but also
+    takes in the address of a previously allocated block of memory of the
+    specified size. This could be used to make constant matrices. */
     TYPE_T
-    MATRIX<T>::MATRIX(const int& rows, const int& columns, T* const matrixPointer) :
+    MATRIX<T>::MATRIX(const int& rows, const int& columns, const T* const matrixPointer) :
         rows(rows), 
         columns(columns),
         length(rows*columns),
         matrix(matrixPointer)
     { std::cout << "CONSTRUCT" << std::endl; }
 
-    // Copy Constructor (allocates new memory and copies matrix; performs deep copy)
+    /* Copy Constructor (allocates new memory and copies matrix; performs deep copy)
+    The copy constructor invokes a deep copy. it creates a new matrix by copying
+    all the content of the other matrix and writing them into a new block of memory. */
     TYPE_T
     MATRIX<T>::MATRIX(const MATRIX<T>& mat) : 
         rows(mat.rows),
@@ -94,7 +104,12 @@ namespace math{
         for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
     }
 
-    // Matrix Destrctor
+    /* Matrix Destrctor
+    A very simple dtor that frees the memory pointed
+    to by the 'matrix' variable. However, There are 
+    situations where this should not be done. therefore,
+    a protection vairable 'canDelete' is there to
+    regulate that (See move operator for more details). */
     TYPE_T
     MATRIX<T>::~MATRIX(){
         if(canDelete) { 
@@ -102,6 +117,8 @@ namespace math{
             std::cout << "DESTROYED" <<std::endl;
         }
     }
+
+    // Getters =======================================
 
     // Get Rows
     TYPE_T
@@ -118,20 +135,6 @@ namespace math{
     // Get Matrix
     TYPE_T
     const T* MATRIX<T>::getMatrix() const{ return matrix; }
-
-    // Fill matrix 
-    TYPE_T
-    void MATRIX<T>::fill(FillFunction func){
-        for(int i = 0; i < rows; i++)
-            for(int j = 0; j < columns; j++)
-                (*this)[i][j] = func(i, j);
-    }
-
-    // Fill matrix
-    TYPE_T
-    void MATRIX<T>::fill(const T& val){
-        for(int i = 0; i < length; i++) matrix[i] = val;
-    }
 
     // Arithmatic Operators ===================================
 
@@ -281,6 +284,33 @@ namespace math{
     // Not Equals
     TYPE_AB bool operator!=(const MATRIX<A>& matA, const MATRIX<B>& matB){
         return !(matA==matB);
+    }
+
+    // Other functions ===================================
+
+    /* Fill matrix
+    This is one of two overloaded functions that help
+    fill the matrix. This particular function has a
+    function pointer as its argument. This function
+    pointed to by the argument should have two
+    arguments of type m_index (const int&) and return
+    a value of type T. essentially what this
+    function does, to summuerize in one equation:
+    matrix[i][j] = func(i, j) where func is the argument. */
+    TYPE_T
+    void MATRIX<T>::fill(FillFunction func){
+        for(int i = 0; i < rows; i++)
+            for(int j = 0; j < columns; j++)
+                (*this)[i][j] = func(i, j);
+    }
+
+    /* Fill matrix
+    This is the second overloaded function of the previous
+    one. It just fill the entire matrix with a constant value
+    specified by the argument. */
+    TYPE_T
+    void MATRIX<T>::fill(const T& val){
+        for(int i = 0; i < length; i++) matrix[i] = val;
     }
 
     
