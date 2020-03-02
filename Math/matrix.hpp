@@ -25,6 +25,13 @@ namespace math{
             }
     };
 
+    class AccessException : public std::exception{
+        public:
+            const char* what() const throw(){
+                return "The location in the matrix trying to be accessed is not valid";
+            }
+    };
+
     TYPE_T
     class MATRIX final{                      // Template class; Cannot be inherited from
         private:
@@ -34,6 +41,14 @@ namespace math{
             T* matrix;                       // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
             typedef T (*FillFunction)(m_index, m_index);     // Used as argument type for 'fill' function
+            struct ColumnVal{
+                private:
+                    T* location;
+                public:
+                T operator[](int column){
+                    return matrix[location + column];
+                };
+            };
         public:
             MATRIX(const int& = 0, const int& = 0);          // Constructor (takes in length and width of matrix)
             MATRIX(const int&, const int&, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
@@ -53,10 +68,13 @@ namespace math{
             TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
             TYPE_U MATRIX<T>& operator-=(const MATRIX<U>&);                            // Subtract matrix from this one
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
+            TYPE_U MATRIX<T>& operator*=(const MATRIX<U>&);                            // Multiply matrix to this one
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<B>&, const A&);            // Scalar Multipliers
             TYPE_AB friend MATRIX<A> operator*(const A&, const MATRIX<B>&);
+            TYPE_U MATRIX<T>& operator*=(const U&);                                    // Multiply scalar to this one
             TYPE_AB friend MATRIX<A> operator/(const MATRIX<B>&, const A&);            // Scalar Divisors
             TYPE_AB friend MATRIX<A> operator/(const A&, const MATRIX<B>&);
+            TYPE_U MATRIX<T>& operator/=(const U&);                                    // Divide scalar to this one
             // Comparison Operators ---------
             TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
             TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
@@ -117,6 +135,11 @@ namespace math{
             std::cout << "DESTROYED" <<std::endl;
         }
     }
+
+    TYPE_T
+    T MATRIX<T>::ColumnVal::operator[](int column){
+        return matrix[location + column];
+    };
 
     // Getters =======================================
 
@@ -224,9 +247,9 @@ namespace math{
     // Operator*
     TYPE_AB
     MATRIX<A> operator*(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
-        if(m1.columns != m2.rows){
-            throw DimensionException();
-        }
+
+        if(m1.columns != m2.rows) throw DimensionException();
+        
         MATRIX<A> mat(m1.rows, m2.columns);
         A temp = (A)0;
         for(int i = 0; i < m1.rows; i++){
@@ -239,6 +262,20 @@ namespace math{
             }
         }
         return mat;
+    }
+
+    // Operator*=
+    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const MATRIX<U>& mat){
+
+        if(mat.rows != columns) throw DimensionException();
+
+        MATRIX<T> mat2 = (*this)*mat;
+        rows = mat2.rows;
+        columns = mat2.columns;
+        mat2.canDelete = false;
+        delete[] matrix;
+        matrix = mat2.matrix;
+        return (*this);
     }
 
     // Scalar Multiplier
@@ -256,6 +293,11 @@ namespace math{
         return mat;
     }
 
+    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const U& c){
+        for(int i = 0; i < length; i++) matrix[i] *= (T)c;
+        return (*this);
+    }
+
     // Scalar Divisor
     TYPE_AB
     MATRIX<A> operator/(const MATRIX<B>& m, const A& c){
@@ -269,6 +311,11 @@ namespace math{
         MATRIX<A> mat(m.rows, m.columns);
         for(int i = 0; i < m.length; i++) mat.matrix[i] = c / (A)m.matrix[i];
         return mat;
+    }
+
+    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator/=(const U& c){
+        for(int i = 0; i < length; i++) matrix[i] /= (T)c;
+        return (*this);
     }
 
     // Comparison operators ======================
