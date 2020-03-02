@@ -41,14 +41,6 @@ namespace math{
             T* matrix;                       // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
             typedef T (*FillFunction)(m_index, m_index);     // Used as argument type for 'fill' function
-            struct ColumnVal{
-                private:
-                    T* location;
-                public:
-                T operator[](int column){
-                    return matrix[location + column];
-                };
-            };
         public:
             MATRIX(const int& = 0, const int& = 0);          // Constructor (takes in length and width of matrix)
             MATRIX(const int&, const int&, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
@@ -60,7 +52,7 @@ namespace math{
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
             // Arithmatic Operators ---------
-            T* operator[](unsigned int i) const;                                       // Access numbers in the matrix
+            T* operator[](unsigned int i) const;                                // Access numbers in the matrix
             TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
             TYPE_U void operator=(const MATRIX<U>&&);                                  // Move operator
             TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
@@ -136,11 +128,6 @@ namespace math{
         }
     }
 
-    TYPE_T
-    T MATRIX<T>::ColumnVal::operator[](int column){
-        return matrix[location + column];
-    };
-
     // Getters =======================================
 
     // Get Rows
@@ -163,7 +150,9 @@ namespace math{
 
     // Operator[]
     TYPE_T
-    T* MATRIX<T>::operator[](unsigned int i) const{ return (T*)&(matrix[i*columns]); }
+    T* MATRIX<T>::operator[](unsigned int row) const{
+        return &matrix[row*columns];
+    }
 
     // Operator= (assign)
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>& mat){

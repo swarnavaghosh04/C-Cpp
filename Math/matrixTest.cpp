@@ -24,11 +24,13 @@ int main(int argv, char** argc){
 
     mat1*=mat2;
 
+    mat1[2][1] = 8;
     std::cout << "MATRIX 1:\n";
     printMatrix(mat1);
 
     std::cout << "\nMatrix 2:\n";
     printMatrix(mat2);
+
 
     std::cout << "\n<=======END=======>" << std::endl;
 }
