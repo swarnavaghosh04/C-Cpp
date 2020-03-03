@@ -18,13 +18,10 @@ int main(int argv, char** argc){
     mat1.fill(12);
     mat2.fill([](m_index i, m_index j){return i+j;});
 
-    
+    mat1(2,1) = 6;
     std::cout << "MATRIX 1:\n";
     printMatrix(mat1);
 
-    mat1*=mat2;
-
-    mat1[2][1] = 8;
     std::cout << "MATRIX 1:\n";
     printMatrix(mat1);
 

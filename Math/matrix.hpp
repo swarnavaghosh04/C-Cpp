@@ -25,6 +25,13 @@ namespace math{
             }
     };
 
+    class AccessViolationException : public std::exception{
+        public:
+            const char* what() const throw(){
+                return "The index that is trying to be read or written to is invalid";
+            }
+    };
+
     TYPE_T
     class MATRIX final{                      // Template class; Cannot be inherited from
         private:
@@ -45,8 +52,8 @@ namespace math{
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
             // Assignment Operators ---------
-            T* operator[](unsigned int i) const;                 // Access numbers in the matrix
-            T& operator()(const unsigned int&, const unsigned int&);
+            T* operator[](unsigned int i) const;                 // Access matrix content
+            T& operator()(const unsigned int&, const unsigned int&) const;  // Access matrix content (safer)
             TYPE_U void operator=(const MATRIX<U>&);             // Assignment operator 
             TYPE_U void operator=(const MATRIX<U>&&);            // Move operator
             TYPE_U MATRIX<T>& operator+=(const MATRIX<U>&);      // Add matrix to self
@@ -145,23 +152,34 @@ namespace math{
 
     /* Operator[]
     The goal of this funtion:
-    be able to call m[i][j] where m
-    is an obejct of this class to access
-    the value at m(i, j)*/
+    be able to call m[i][j], where 'm'
+    is an obejct of this class, to access
+    the value at row 'i' and column 'j' of 'm'.
+    However, this is not as safe as the next
+    function as this can access memeory that
+    is beyond the range of allocated memory*/
     TYPE_T
     T* MATRIX<T>::operator[](unsigned int row) const{
-        return &matrix[row*columns];
+        return matrix + (row*columns);
     }
 
-    // Operator ()
+    /* Operator ()
+    This the safer version of the previous function.
+    It allows the user to access row 'i' and column
+    'j' of a MATRIX object 'm' via this notation: 
+    m(i, j)
+    If 'i' and 'j' are not valid, then this function
+    throws an instance of 'AccessViolationException' */
     TYPE_T
-    T& MATRIX<T>::operator()(const unsigned int& i, const unsigned int& j){
-        
+    T& MATRIX<T>::operator()(const unsigned int& i, const unsigned int& j) const{
+        if(i >= rows || j >= columns) throw AccessViolationException();
+        return matrix[i*columns + j];
     }
 
     /* Operator= (assign)
     Performs deep copy of entire matrix*/
-    TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>& mat){
+    TYPE_T TYPE_U
+    void MATRIX<T>::operator=(const MATRIX<U>& mat){
         std::cout << "ASSIGN" << std::endl;
         /* If the two matrices do not have the
         same dimensions, deallocate this matrix,
@@ -178,18 +196,29 @@ namespace math{
         for(int i = 0; i < length; i++) matrix[i] = (T)mat.matrix[i];
     }
 
-    // Operator= (move)
+    /* Operator= (move)
+    The move operator does not perform a deep copy.
+    It only exchanges the pointer values. In the case
+    that the dimensions are not the same, the members: 
+    rows, columns and length are updated. In the case
+    that the two objects are not of the same template
+    type, then the entire thing is ran through a
+    re-casting loop */
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>&& mat){
         std::cout << "MOVE" << std::endl;
-        if(rows != mat.rows || columns != mat.columns){
+        if(rows != mat.rows || columns != mat.columns){         // update dimension specifying member sif necessary
             rows = mat.rows;
             columns = mat.columns;
             length = mat.length;
         }
+        /*since mat is going to get destroyed after the function
+        terminates, the matrix is going to get deallocated.
+        To prevent this, mat.canDelete is set to false as we are
+        going to assign the mat's matrix to this matrix */
         mat.canDelete = false;
-        delete[] matrix;
-        matrix = mat.matrix;
-        if(!std::is_same<T, U>::value)
+        delete[] matrix;                 // Deallocate this matrix
+        matrix = (T*)mat.matrix;         // Assign mat's matrix to this matrix
+        if(!std::is_same<T, U>::value)   // Reinterpret the casts if mat and this to not have the same template args
             for(int i = 0; i < length; i++) matrix[i] = (T)matrix[i];
     }
 
