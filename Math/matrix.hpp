@@ -44,22 +44,24 @@ namespace math{
             int getColumns() const;  	        // Returns the number of column
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
+            // Assignment Operators ---------
+            T* operator[](unsigned int i) const;                 // Access numbers in the matrix
+            T& operator()(const unsigned int&, const unsigned int&);
+            TYPE_U void operator=(const MATRIX<U>&);             // Assignment operator 
+            TYPE_U void operator=(const MATRIX<U>&&);            // Move operator
+            TYPE_U MATRIX<T>& operator+=(const MATRIX<U>&);      // Add matrix to self
+            TYPE_U MATRIX<T>& operator-=(const MATRIX<U>&);      // Subtract matrix from self
+            TYPE_U MATRIX<T>& operator*=(const MATRIX<U>&);      // Multiply matrix to self
+            TYPE_U MATRIX<T>& operator*=(const U&);              // Multiply scalar to self
+            TYPE_U MATRIX<T>& operator/=(const U&);              // Divide scalar to self
             // Arithmatic Operators ---------
-            T* operator[](unsigned int i) const;                                // Access numbers in the matrix
-            TYPE_U void operator=(const MATRIX<U>&);                                   // Assignment operator 
-            TYPE_U void operator=(const MATRIX<U>&&);                                  // Move operator
             TYPE_AB friend MATRIX<A> operator+(const MATRIX<A>&, const MATRIX<B>&);    // Add matrices
-            TYPE_U MATRIX<T>& operator+=(const MATRIX<U>&);                            // Add matrix to this one
             TYPE_AB friend MATRIX<A> operator-(const MATRIX<A>&, const MATRIX<B>&);    // Subtract matrices
-            TYPE_U MATRIX<T>& operator-=(const MATRIX<U>&);                            // Subtract matrix from this one
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<A>&, const MATRIX<B>&);    // Multiply matrices
-            TYPE_U MATRIX<T>& operator*=(const MATRIX<U>&);                            // Multiply matrix to this one
             TYPE_AB friend MATRIX<A> operator*(const MATRIX<B>&, const A&);            // Scalar Multipliers
             TYPE_AB friend MATRIX<A> operator*(const A&, const MATRIX<B>&);
-            TYPE_U MATRIX<T>& operator*=(const U&);                                    // Multiply scalar to this one
             TYPE_AB friend MATRIX<A> operator/(const MATRIX<B>&, const A&);            // Scalar Divisors
             TYPE_AB friend MATRIX<A> operator/(const A&, const MATRIX<B>&);
-            TYPE_U MATRIX<T>& operator/=(const U&);                                    // Divide scalar to this one
             // Comparison Operators ---------
             TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
             TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
@@ -139,17 +141,32 @@ namespace math{
     TYPE_T
     const T* MATRIX<T>::getMatrix() const{ return matrix; }
 
-    // Arithmatic Operators ===================================
+    // Assignment Operators ===================================
 
-    // Operator[]
+    /* Operator[]
+    The goal of this funtion:
+    be able to call m[i][j] where m
+    is an obejct of this class to access
+    the value at m(i, j)*/
     TYPE_T
     T* MATRIX<T>::operator[](unsigned int row) const{
         return &matrix[row*columns];
     }
 
-    // Operator= (assign)
+    // Operator ()
+    TYPE_T
+    T& MATRIX<T>::operator()(const unsigned int& i, const unsigned int& j){
+        
+    }
+
+    /* Operator= (assign)
+    Performs deep copy of entire matrix*/
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>& mat){
         std::cout << "ASSIGN" << std::endl;
+        /* If the two matrices do not have the
+        same dimensions, deallocate this matrix,
+        and allocate a new chunck of memory of
+        appropriate length.*/
         if(rows != mat.rows || columns != mat.columns){
             rows = mat.rows;
             columns = mat.columns;
@@ -157,6 +174,7 @@ namespace math{
             delete[] matrix;
             matrix = new T[length];
         }
+        // Copy over the matrix
         for(int i = 0; i < length; i++) matrix[i] = (T)mat.matrix[i];
     }
 
@@ -174,6 +192,52 @@ namespace math{
         if(!std::is_same<T, U>::value)
             for(int i = 0; i < length; i++) matrix[i] = (T)matrix[i];
     }
+
+    // Operator+=
+    TYPE_T TYPE_U
+    MATRIX<T>& MATRIX<T>::operator+=(const MATRIX<U>& mat){
+        if(rows != mat.rows || columns != mat.columns){
+            throw DimensionException();
+        }
+        for(int i = 0; i < length; i++) matrix[i] += (T)mat.matrix[i];
+        return (*this);
+    }
+
+    // Operator-=
+    TYPE_T TYPE_U
+    MATRIX<T>& MATRIX<T>::operator-=(const MATRIX<U>& mat){
+        if(rows != mat.rows || columns != mat.columns){
+            throw DimensionException();
+        }
+        for(int i = 0; i < length; i++) matrix[i] -= (T)mat.matrix[i];
+        retrun (*this);
+    }
+
+    // Operator*=
+    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const MATRIX<U>& mat){
+
+        if(mat.rows != columns) throw DimensionException();
+
+        MATRIX<T> mat2 = (*this)*mat;
+        rows = mat2.rows;
+        columns = mat2.columns;
+        mat2.canDelete = false;
+        delete[] matrix;
+        matrix = mat2.matrix;
+        return (*this);
+    }
+
+    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const U& c){
+        for(int i = 0; i < length; i++) matrix[i] *= (T)c;
+        return (*this);
+    }
+
+    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator/=(const U& c){
+        for(int i = 0; i < length; i++) matrix[i] /= (T)c;
+        return (*this);
+    }
+
+    // Arithmatic Operators =================
 
     // Operator+
     TYPE_AB
@@ -193,16 +257,6 @@ namespace math{
         return mat;
     }
 
-    // Operator+=
-    TYPE_T TYPE_U
-    MATRIX<T>& MATRIX<T>::operator+=(const MATRIX<U>& mat){
-        if(rows != mat.rows || columns != mat.columns){
-            throw DimensionException();
-        }
-        for(int i = 0; i < length; i++) matrix[i] += (T)mat.matrix[i];
-        return (*this);
-    }
-
     // Operator-
     TYPE_AB
     MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
@@ -214,16 +268,6 @@ namespace math{
             mat.matrix[i] = m1.matrix[i] - (A)(m2.matrix[i]);
         }
         return mat;
-    }
-
-    // Operator-=
-    TYPE_T TYPE_U
-    MATRIX<T>& MATRIX<T>::operator-=(const MATRIX<U>& mat){
-        if(rows != mat.rows || columns != mat.columns){
-            throw DimensionException();
-        }
-        for(int i = 0; i < length; i++) matrix[i] -= (T)mat.matrix[i];
-        retrun (*this);
     }
 
     // Operator*
@@ -246,20 +290,6 @@ namespace math{
         return mat;
     }
 
-    // Operator*=
-    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const MATRIX<U>& mat){
-
-        if(mat.rows != columns) throw DimensionException();
-
-        MATRIX<T> mat2 = (*this)*mat;
-        rows = mat2.rows;
-        columns = mat2.columns;
-        mat2.canDelete = false;
-        delete[] matrix;
-        matrix = mat2.matrix;
-        return (*this);
-    }
-
     // Scalar Multiplier
     TYPE_AB
     MATRIX<A> operator*(const MATRIX<B>& m, const A& c){
@@ -275,11 +305,6 @@ namespace math{
         return mat;
     }
 
-    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const U& c){
-        for(int i = 0; i < length; i++) matrix[i] *= (T)c;
-        return (*this);
-    }
-
     // Scalar Divisor
     TYPE_AB
     MATRIX<A> operator/(const MATRIX<B>& m, const A& c){
@@ -293,11 +318,6 @@ namespace math{
         MATRIX<A> mat(m.rows, m.columns);
         for(int i = 0; i < m.length; i++) mat.matrix[i] = c / (A)m.matrix[i];
         return mat;
-    }
-
-    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator/=(const U& c){
-        for(int i = 0; i < length; i++) matrix[i] /= (T)c;
-        return (*this);
     }
 
     // Comparison operators ======================
@@ -317,7 +337,7 @@ namespace math{
 
     // Other functions ===================================
 
-    /* Fill matrix
+    /* Fill matrix - overload 1
     This is one of two overloaded functions that help
     fill the matrix. This particular function has a
     function pointer as its argument. This function
@@ -333,7 +353,7 @@ namespace math{
                 (*this)[i][j] = func(i, j);
     }
 
-    /* Fill matrix
+    /* Fill matrix - overload 2
     This is the second overloaded function of the previous
     one. It just fill the entire matrix with a constant value
     specified by the argument. */
