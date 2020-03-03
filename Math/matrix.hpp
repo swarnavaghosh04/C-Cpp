@@ -222,7 +222,10 @@ namespace math{
             for(int i = 0; i < length; i++) matrix[i] = (T)matrix[i];
     }
 
-    // Operator+=
+    /* Operator+=
+    Straight forward addition of matrices.
+    Throws 'DimensionException' if matrices don't
+    match in terms of size */
     TYPE_T TYPE_U
     MATRIX<T>& MATRIX<T>::operator+=(const MATRIX<U>& mat){
         if(rows != mat.rows || columns != mat.columns){
@@ -232,7 +235,10 @@ namespace math{
         return (*this);
     }
 
-    // Operator-=
+    /* Operator-=
+    Straight forward subtraction of matrices.
+    Throws 'DimensionException' if matrices don't
+    match in terms of size */
     TYPE_T TYPE_U
     MATRIX<T>& MATRIX<T>::operator-=(const MATRIX<U>& mat){
         if(rows != mat.rows || columns != mat.columns){
