@@ -25,13 +25,6 @@ namespace math{
             }
     };
 
-    class AccessException : public std::exception{
-        public:
-            const char* what() const throw(){
-                return "The location in the matrix trying to be accessed is not valid";
-            }
-    };
-
     TYPE_T
     class MATRIX final{                      // Template class; Cannot be inherited from
         private:
