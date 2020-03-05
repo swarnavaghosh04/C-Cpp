@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include "matrix.hpp"
 
 using namespace math;
@@ -20,15 +21,12 @@ int main(int argv, char** argc){
     mat1.fill(12);
     mat2.fill([](m_index i, m_index j){return (double)(i+j);});
 
-    mat1(2,1) = 6;
-    std::cout << "MATRIX 1:\n";
-    printMatrix(mat1);
-
-    std::cout << "MATRIX 1:\n";
-    printMatrix(mat1);
-
-    std::cout << "\nMatrix 2:\n";
-    printMatrix(mat2);
+    {
+        Timer t;
+        for(int i = 0; i < 10000; i++){
+            mat1[i%3][i%4] = 9;
+        }
+    }
 
     std::cout << "\n<=======END=======>" << std::endl;
 }

@@ -14,7 +14,7 @@
 #define TYPE_U template<typename U>
 #define TYPE_AB template<typename A, typename B>
 
-typedef const int& m_index;      // Useful for 'fill' function call
+typedef const unsigned int& m_index;
 
 namespace math{
 
@@ -42,8 +42,8 @@ namespace math{
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
             typedef T (*FillFunction)(m_index, m_index);     // Used as argument type for 'fill' function
         public:
-            MATRIX(const int& = 0, const int& = 0);          // Constructor (takes in length and width of matrix)
-            MATRIX(const int&, const int&, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
+            MATRIX(m_index = 0, m_index = 0);          // Constructor (takes in length and width of matrix)
+            MATRIX(m_index, m_index, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
             MATRIX(const MATRIX<T>&);                        // Copy Constructor (allocates new memory and copies matrix)
             ~MATRIX();               	                     // Destructor (frees the memory)
             // Getters ---------------
@@ -52,8 +52,8 @@ namespace math{
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
             // Assignment Operators ---------
-            T* operator[](unsigned int i) const;                 // Access matrix content
-            T& operator()(const unsigned int&, const unsigned int&) const;  // Access matrix content (safer)
+            T* operator[](m_index) const;              // Access matrix content
+            T& operator()(m_index, m_index) const;     // Access matrix content (safer)
             TYPE_U void operator=(const MATRIX<U>&);             // Assignment operator 
             TYPE_U void operator=(const MATRIX<U>&&);            // Move operator
             TYPE_U MATRIX<T>& operator+=(const MATRIX<U>&);      // Add matrix to self
@@ -72,6 +72,8 @@ namespace math{
             // Comparison Operators ---------
             TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
             TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
+            // Arithmatic functions ----------
+            T& transposed(m_index row) const;
             // Other functions ------------
             void fill(FillFunction);            // Fills The matrix with a pattern based off of position
             void fill(const T&);                // Fill the entire matrix with a single value
@@ -84,7 +86,7 @@ namespace math{
     in the dimensions of the matrix and dynamically
     allocates that much space. */
     TYPE_T
-    MATRIX<T>::MATRIX(const int& rows, const int& columns) : 
+    MATRIX<T>::MATRIX(m_index rows, m_index columns) : 
         rows(rows), 
         columns(columns),
         length(rows*columns)
@@ -95,7 +97,7 @@ namespace math{
     takes in the address of a previously allocated block of memory of the
     specified size. This could be used to make constant matrices. */
     TYPE_T
-    MATRIX<T>::MATRIX(const int& rows, const int& columns, const T* const matrixPointer) :
+    MATRIX<T>::MATRIX(m_index rows, m_index columns, const T* const matrixPointer) :
         rows(rows), 
         columns(columns),
         length(rows*columns),
@@ -150,7 +152,7 @@ namespace math{
 
     // Assignment Operators ===================================
 
-    /* Operator[]
+    /* Operator[] (unsafe)
     The goal of this funtion:
     be able to call m[i][j], where 'm'
     is an obejct of this class, to access
@@ -159,11 +161,11 @@ namespace math{
     function as this can access memeory that
     is beyond the range of allocated memory*/
     TYPE_T
-    T* MATRIX<T>::operator[](unsigned int row) const{
+    T* MATRIX<T>::operator[](m_index row) const{
         return matrix + (row*columns);
     }
 
-    /* Operator ()
+    /* Operator ()    (safe)
     This the safer version of the previous function.
     It allows the user to access row 'i' and column
     'j' of a MATRIX object 'm' via this notation: 
@@ -171,7 +173,7 @@ namespace math{
     If 'i' and 'j' are not valid, then this function
     throws an instance of 'AccessViolationException' */
     TYPE_T
-    T& MATRIX<T>::operator()(const unsigned int& i, const unsigned int& j) const{
+    T& MATRIX<T>::operator()(m_index i, m_index j) const{
         if(i >= rows || j >= columns) throw AccessViolationException();
         return matrix[i*columns + j];
     }
@@ -325,7 +327,9 @@ namespace math{
         return mat;
     }
 
-    // Scalar Multiplier
+    /* Scalar Multiplier
+    Allows that matrix to be scaled up or down
+    by a factor. This operator is commutative*/
     TYPE_AB
     MATRIX<A> operator*(const MATRIX<B>& m, const A& c){
         MATRIX<A> mat(m.rows, m.columns);
@@ -340,7 +344,9 @@ namespace math{
         return mat;
     }
 
-    // Scalar Divisor
+    /* Scalar Divisor
+    Allows that matrix to be scaled up or down
+    by some factor. This operator is non-commutative*/
     TYPE_AB
     MATRIX<A> operator/(const MATRIX<B>& m, const A& c){
         MATRIX<A> mat(m.rows, m.columns);
