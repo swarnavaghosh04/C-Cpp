@@ -51,6 +51,8 @@ namespace math{
             int getColumns() const;  	        // Returns the number of column
             int getLength() const;   	        // Returns the total length of the matrix (rows x columns)
             const T* getMatrix() const;         // Returns the location of the matrix
+            int getTransposedRows() const;
+            int getTransposedColumns() const;
             // Assignment Operators ---------
             T* operator[](m_index) const;              // Access matrix content
             T& operator()(m_index, m_index) const;     // Access matrix content (safer)
@@ -73,7 +75,7 @@ namespace math{
             TYPE_AB friend bool operator==(const MATRIX<A>&, const MATRIX<B>&);        // Equals
             TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
             // Arithmatic functions ----------
-            T& transposed(m_index row) const;
+            T& transposed(m_index, m_index) const;
             // Other functions ------------
             void fill(FillFunction);            // Fills The matrix with a pattern based off of position
             void fill(const T&);                // Fill the entire matrix with a single value
@@ -149,6 +151,11 @@ namespace math{
     // Get Matrix
     TYPE_T
     const T* MATRIX<T>::getMatrix() const{ return matrix; }
+
+    TYPE_T
+    int MATRIX<T>::getTransposedRows() const{ return columns; }
+    TYPE_T
+    int MATRIX<T>::getTransposedColumns() const{ return rows; }
 
     // Assignment Operators ===================================
 
@@ -374,6 +381,14 @@ namespace math{
     // Not Equals
     TYPE_AB bool operator!=(const MATRIX<A>& matA, const MATRIX<B>& matB){
         return !(matA==matB);
+    }
+
+    // Arithmatic functions ============================
+
+    TYPE_T
+    T& MATRIX<T>::transposed(m_index i, m_index j) const{
+        if(i >= columns || j >= rows) throw AccessViolationException();
+        return matrix[j*columns + i];
     }
 
     // Other functions ===================================
