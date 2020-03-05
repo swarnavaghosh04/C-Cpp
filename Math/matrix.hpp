@@ -14,7 +14,7 @@
 #define TYPE_U template<typename U>
 #define TYPE_AB template<typename A, typename B>
 
-typedef const unsigned int& m_index;
+typedef const int& m_index;
 
 namespace math{
 
@@ -76,6 +76,8 @@ namespace math{
             TYPE_AB friend bool operator!=(const MATRIX<A>&, const MATRIX<B>&);        // Not Equals
             // Arithmatic functions ----------
             T& transposed(m_index, m_index) const;
+            MATRIX<T> transpose() const;
+            /**/MATRIX<T>& transposeSelf();
             // Other functions ------------
             void fill(FillFunction);            // Fills The matrix with a pattern based off of position
             void fill(const T&);                // Fill the entire matrix with a single value
@@ -389,6 +391,31 @@ namespace math{
     T& MATRIX<T>::transposed(m_index i, m_index j) const{
         if(i >= columns || j >= rows) throw AccessViolationException();
         return matrix[j*columns + i];
+    }
+
+    TYPE_T
+    MATRIX<T> MATRIX<T>::transpose() const{
+        MATRIX<T> mat(columns, rows);
+        for(int i = 0; i < columns; i++)
+            for(int j = 0; j < rows; j++)
+                mat.matrix[i*rows+j] = matrix[j*columns+i];
+        return mat;
+    }
+
+
+    /*!!!!!!!!!!!!!!!!!!!!!!Can Imporve!!!!!!!!!!!!!!!!!!!!!111*/
+    TYPE_T
+    MATRIX<T>& MATRIX<T>::transposeSelf(){
+        T* tMatrix = new T[length];
+        int temp = rows;
+        rows = columns;
+        columns = temp;
+        for(int i = 0; i < rows; i++)
+            for(int j = 0; j < columns; j++)
+                tMatrix[i*columns+j] = matrix[j*rows+i];
+        delete[] matrix;
+        matrix = tMatrix;
+        return (*this);
     }
 
     // Other functions ===================================

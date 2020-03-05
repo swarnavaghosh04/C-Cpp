@@ -23,8 +23,14 @@ void printMatrix(MATRIX<int>& m){
 int main(int argv, char** argc){
     MATRIX<int> mat1(3, 4);
     mat1.fill([](m_index i, m_index j){return i+j;});
+    MATRIX<int> t_mat1 = mat1.transpose();
     printMatrix(mat1);
     std::cout << std::endl;
     printTransposedMatrix(mat1);
+    std::cout << std::endl;
+    printMatrix(t_mat1);
+    std::cout << std::endl;
+    mat1.transposeSelf();
+    printMatrix(mat1);
     std::cout << "\n<=======END=======>" << std::endl;
 }
