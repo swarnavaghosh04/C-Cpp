@@ -402,7 +402,6 @@ namespace math{
         return mat;
     }
 
-
     /*!!!!!!!!!!!!!!!!!!!!!!Can Imporve!!!!!!!!!!!!!!!!!!!!!111*/
     TYPE_T
     MATRIX<T>& MATRIX<T>::transposeSelf(){
