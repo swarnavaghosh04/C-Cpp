@@ -408,7 +408,7 @@ namespace math{
         rows = columns;
         columns = temp;
         if(columns == 1 || rows == 1) return (*this);
-        T* tMatrix = new T[length];
+        //T* tMatrix = new T[length];
         for(int i = 1; i < rows; i++)
             for(int j = 0; j < columns-1; j++){
                 temp = matrix[j*rows+i];

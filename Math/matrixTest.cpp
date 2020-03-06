@@ -21,7 +21,7 @@ void printMatrix(MATRIX<int>& m){
 }
 
 int main(int argv, char** argc){
-    MATRIX<int> mat(4, 8);
+    MATRIX<int> mat(8, 1);
     mat.fill([](m_index i, m_index j){return (i*i + j*j - 2*i*j);});
     std::cout << "mat:\n";
     printMatrix(mat);
