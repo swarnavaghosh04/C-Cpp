@@ -21,8 +21,9 @@ void printMatrix(MATRIX<int>& m){
 }
 
 int main(int argv, char** argc){
-    MATRIX<int> mat(8, 1);
-    mat.fill([](m_index i, m_index j){return (i*i + j*j - 2*i*j);});
+    int* q = new int[18];
+    for(int i = 0; i < 16; i++) q[i] = i+1;
+    MATRIX<int> mat(3, 6, q);
     std::cout << "mat:\n";
     printMatrix(mat);
     mat.transposeSelf();

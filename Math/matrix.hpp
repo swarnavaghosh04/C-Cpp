@@ -105,7 +105,7 @@ namespace math{
         rows(rows), 
         columns(columns),
         length(rows*columns),
-        matrix(matrixPointer)
+        matrix((T*)matrixPointer)
     { std::cout << "CONSTRUCT" << std::endl; }
 
     /* Copy Constructor (allocates new memory and copies matrix; performs deep copy)
