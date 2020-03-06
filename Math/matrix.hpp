@@ -402,18 +402,22 @@ namespace math{
         return mat;
     }
 
-    /*!!!!!!!!!!!!!!!!!!!!!!Can Imporve!!!!!!!!!!!!!!!!!!!!!111*/
     TYPE_T
     MATRIX<T>& MATRIX<T>::transposeSelf(){
-        T* tMatrix = new T[length];
         int temp = rows;
         rows = columns;
         columns = temp;
-        for(int i = 0; i < rows; i++)
-            for(int j = 0; j < columns; j++)
-                tMatrix[i*columns+j] = matrix[j*rows+i];
-        delete[] matrix;
-        matrix = tMatrix;
+        if(columns == 1 || rows == 1) return (*this);
+        T* tMatrix = new T[length];
+        for(int i = 1; i < rows; i++)
+            for(int j = 0; j < columns-1; j++){
+                temp = matrix[j*rows+i];
+                matrix[j*rows+i] = matrix[i*columns+j];
+                matrix[i*columns+j] = temp;
+                //tMatrix[i*columns+j] = matrix[j*rows+i];
+            }
+        //delete[] matrix;
+        //matrix = tMatrix;
         return (*this);
     }
 

@@ -22,9 +22,10 @@ void printMatrix(MATRIX<int>& m){
 
 int main(int argv, char** argc){
     MATRIX<int> mat(4, 8);
+    mat.fill([](m_index i, m_index j){return (i*i + j*j - 2*i*j);});
     std::cout << "mat:\n";
     printMatrix(mat);
-    mat = mat.transpose();
+    mat.transposeSelf();
     std::cout << "\nmat: \n";
     printMatrix(mat);
     std::cout << "\n<=======END=======>" << std::endl;
