@@ -409,15 +409,21 @@ namespace math{
         columns = temp;
         if(columns == 1 || rows == 1) return (*this);
         //T* tMatrix = new T[length];
-        for(int i = 1; i < rows; i++)
-            for(int j = 0; j < columns-1; j++){
-                temp = matrix[j*rows+i];
-                matrix[j*rows+i] = matrix[i*columns+j];
-                matrix[i*columns+j] = temp;
-                //tMatrix[i*columns+j] = matrix[j*rows+i];
-            }
-        //delete[] matrix;
-        //matrix = tMatrix;
+        if(rows == columns)
+            for(int i = 1; i < rows; i++)
+                for(int j = 0; j < columns-1; j++){
+                    temp = matrix[j*rows+i];
+                    matrix[j*rows+i] = matrix[i*columns+j];
+                    matrix[i*columns+j] = temp;
+                }
+        else{
+            T* tMatrix = new T[length];
+            for(int i = 1; i < rows; i++)
+                for(int j = 0; j < columns; j++)
+                    tMatrix[i*columns+j] = matrix[j*rows+i];
+            delete[] matrix;
+            matrix = tMatrix;
+        }
         return (*this);
     }
 
@@ -448,7 +454,6 @@ namespace math{
         for(int i = 0; i < length; i++) matrix[i] = val;
     }
 
-    
 }
 
 #endif
