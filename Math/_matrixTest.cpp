@@ -20,14 +20,36 @@ void printMatrix(MATRIX<int>& m){
     }
 }
 
+class Time{
+    private:
+        std::chrono::system_clock::time_point start, end;
+        const char* endMessage;
+    public:
+        Time(const char* endMessage) : endMessage(endMessage){
+            start = std::chrono::system_clock::now();
+        }
+        ~Time(){
+            end = std::chrono::system_clock::now();
+            std::chrono::duration<double> dur = end-start;
+            printf("%s lasted %f ms\n", endMessage, (dur*1000));
+        }
+};
+
+#define ITERS 10001
+#define MAT_ROWS 7
+#define MAT_COLUMNS 5
+
 int main(int argv, char** argc){
-    int* q = new int[18];
-    for(int i = 0; i < 18; i++) q[i] = i+1;
-    MATRIX<int> mat(3, 6, q);
-    std::cout << "mat:\n";
+    MATRIX<int> mat(MAT_ROWS, MAT_COLUMNS);
+    MATRIX<int> tmat(MAT_COLUMNS, MAT_ROWS);
+    mat.fill([](m_index i, m_index j){return i+j;});
+    {
+        Time t("transpose() test");
+        for(int i = 0; i < ITERS; i++) tmat = mat.transpose();
+    }
+    {
+        Time t("tranposeSelf() test");
+        for(int i = 0; i < ITERS; i++) tmat = mat.transposeSelf();
+    }
     printMatrix(mat);
-    mat.transposeSelf();
-    std::cout << "\nmat: \n";
-    printMatrix(mat);
-    std::cout << "\n<=======END=======>" << std::endl;
 }

@@ -97,7 +97,7 @@ namespace math{
         rows(rows), 
         columns(columns),
         length(rows*columns)
-    { matrix = new T[length]; std::cout << "CONSTRUCT" << std::endl; }
+    { matrix = new T[length]; /*std::cout << "CONSTRUCT" << std::endl;*/ }
 
     /* Matrix Constructor (rows, columns, pointer to 1D heap allocated memory)
     This constructor not only takes in the dimensions of the matrix, but also
@@ -109,7 +109,7 @@ namespace math{
         columns(columns),
         length(rows*columns),
         matrix((T*)matrixPointer)
-    { std::cout << "CONSTRUCT" << std::endl; }
+    { /*std::cout << "CONSTRUCT" << std::endl;*/ }
 
     /* Copy Constructor (allocates new memory and copies matrix; performs deep copy)
     The copy constructor invokes a deep copy. it creates a new matrix by copying
@@ -120,7 +120,7 @@ namespace math{
         columns(mat.columns),
         length(mat.length)
     {
-        std::cout << "COPY" << std::endl;
+        //std::cout << "COPY" << std::endl;
         matrix = new T[length];
         for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
     }
@@ -135,7 +135,7 @@ namespace math{
     MATRIX<T>::~MATRIX(){
         if(canDelete) { 
             delete[] matrix;
-            std::cout << "DESTROYED" <<std::endl;
+            //std::cout << "DESTROYED" <<std::endl;
         }
     }
 
@@ -194,7 +194,7 @@ namespace math{
     Performs deep copy of entire matrix*/
     TYPE_T TYPE_U
     void MATRIX<T>::operator=(const MATRIX<U>& mat){
-        std::cout << "ASSIGN" << std::endl;
+        //std::cout << "ASSIGN" << std::endl;
         /* If the two matrices do not have the
         same dimensions, deallocate this matrix,
         and allocate a new chunck of memory of
@@ -219,7 +219,7 @@ namespace math{
     type, then the entire thing is ran through a
     re-casting loop */
     TYPE_T TYPE_U void MATRIX<T>::operator=(const MATRIX<U>&& mat){
-        std::cout << "MOVE" << std::endl;
+        //std::cout << "MOVE" << std::endl;
         if(rows != mat.rows || columns != mat.columns){         // update dimension specifying member sif necessary
             rows = mat.rows;
             columns = mat.columns;
