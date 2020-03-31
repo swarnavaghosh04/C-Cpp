@@ -22,7 +22,7 @@ void printMatrix(MATRIX<int>& m){
 
 int main(int argv, char** argc){
     int* q = new int[18];
-    for(int i = 0; i < 16; i++) q[i] = i+1;
+    for(int i = 0; i < 18; i++) q[i] = i+1;
     MATRIX<int> mat(3, 6, q);
     std::cout << "mat:\n";
     printMatrix(mat);

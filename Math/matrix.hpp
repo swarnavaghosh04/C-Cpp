@@ -41,6 +41,9 @@ namespace math{
             T* matrix;                       // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;   // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
             typedef T (*FillFunction)(m_index, m_index);     // Used as argument type for 'fill' function
+            void shiftElement(m_index, m_index, T*);         // Used by transposeSelf_rec()
+            void transposeSelf_rec(m_index, m_index, T*);
+
         public:
             MATRIX(m_index = 0, m_index = 0);          // Constructor (takes in length and width of matrix)
             MATRIX(m_index, m_index, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
@@ -403,31 +406,32 @@ namespace math{
     }
 
     TYPE_T
+    void MATRIX<T>::transposeSelf_rec(m_index numRows, m_index numColumns, T* matrixStart){
+        if(numColumns == 1) return;
+        for(int i = 1; i < numRows; i++) shiftElement(numColumns*i, i, matrixStart);
+        transposeSelf_rec(numRows, numColumns-1, matrixStart+numRows);
+    }
+
+    TYPE_T
     MATRIX<T>& MATRIX<T>::transposeSelf(){
+        transposeSelf_rec(rows, columns, matrix);
         int temp = rows;
         rows = columns;
         columns = temp;
-        if(columns == 1 || rows == 1) return (*this);
-        //T* tMatrix = new T[length];
-        if(rows == columns)
-            for(int i = 1; i < rows; i++)
-                for(int j = 0; j < columns-1; j++){
-                    temp = matrix[j*rows+i];
-                    matrix[j*rows+i] = matrix[i*columns+j];
-                    matrix[i*columns+j] = temp;
-                }
-        else{
-            T* tMatrix = new T[length];
-            for(int i = 1; i < rows; i++)
-                for(int j = 0; j < columns; j++)
-                    tMatrix[i*columns+j] = matrix[j*rows+i];
-            delete[] matrix;
-            matrix = tMatrix;
-        }
         return (*this);
     }
 
     // Other functions ===================================
+
+    TYPE_T
+    void MATRIX<T>::shiftElement(m_index oldIndex, m_index newIndex, T* array){
+        if(oldIndex == newIndex) return;
+        T temp = array[oldIndex];
+        int c = newIndex < oldIndex ? -1 : 1;
+        for(int i = oldIndex; newIndex-i!=0; i+=c) array[i] = array[i+c];
+        array[newIndex] = temp;
+        return;
+    }
 
     /* Fill matrix - overload 1
     This is one of two overloaded functions that help
