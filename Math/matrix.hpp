@@ -290,7 +290,7 @@ namespace math{
 
     // Operator+
     TYPE_AB
-    MATRIX<A> operator+(const MATRIX<A>& m1, const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
+    MATRIX<A> operator+(const MATRIX<A>& m1, const MATRIX<B>& m2) {
         
         // Error checking (dimension need to be the same)
         if(m1.rows != m2.rows || m1.columns != m2.columns)
@@ -308,7 +308,7 @@ namespace math{
 
     // Operator-
     TYPE_AB
-    MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {      // Argument needs to be a reference, or else local copy will affect the input matrix
+    MATRIX<A> operator-(const MATRIX<A>& m1 , const MATRIX<B>& m2) {
         if(m1.rows != m2.rows || m1.columns != m2.columns){
             throw DimensionException();
         }
