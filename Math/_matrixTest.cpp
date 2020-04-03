@@ -1,15 +1,26 @@
 #include <iostream>
 #include <chrono>
+#include <cstdlib>
 #include "matrix.hpp"
+//#include "..\Other\Time.hpp"
 
 using namespace math;
 
-void printTransposedMatrix(MATRIX<int>& m){
+void printTransposedMatrix(MATRIX<float>& m){
     for(int i = 0; i < m.getTransposedRows(); i++){
         for(int j = 0; j < m.getTransposedColumns(); j++)
-            printf("%-6d", m.transposed(i, j));
+            printf("%-6.1f", m.transposed(i, j));
         std::cout << std::endl;
     }
+}
+
+void printMatrix(MATRIX<float>& m){
+    for(int i = 0; i < m.getRows(); i++){
+        for(int j = 0; j < m.getColumns(); j++)
+            printf("%-6.1f", m(i, j));
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 void printMatrix(MATRIX<int>& m){
@@ -18,38 +29,48 @@ void printMatrix(MATRIX<int>& m){
             printf("%-6d", m(i, j));
         std::cout << std::endl;
     }
+    std::cout << std::endl;
 }
 
-class Time{
-    private:
-        std::chrono::system_clock::time_point start, end;
-        const char* endMessage;
-    public:
-        Time(const char* endMessage) : endMessage(endMessage){
-            start = std::chrono::system_clock::now();
-        }
-        ~Time(){
-            end = std::chrono::system_clock::now();
-            std::chrono::duration<double> dur = end-start;
-            printf("%s lasted %f ms\n", endMessage, (dur*1000));
-        }
-};
-
-#define ITERS 10001
-#define MAT_ROWS 7
-#define MAT_COLUMNS 5
+#define ITERS 10000
+#define SQR_SIZE 6
+#define SQUARE SQR_SIZE, SQR_SIZE
 
 int main(int argv, char** argc){
-    MATRIX<int> mat(MAT_ROWS, MAT_COLUMNS);
-    MATRIX<int> tmat(MAT_COLUMNS, MAT_ROWS);
-    mat.fill([](m_index i, m_index j){return i+j;});
-    {
-        Time t("transpose() test");
-        for(int i = 0; i < ITERS; i++) tmat = mat.transpose();
+
+    MATRIX<float> mat(SQUARE);
+    mat.fill(0.f);
+
+    for(int i = 0; i < mat.getRows(); i++){
+        mat(i, i) = 2;
+        try { mat(i, i+1) = -1; }
+        catch(AccessViolationException e){}
+        try { mat(i, i-1) = -1; }
+        catch(AccessViolationException e){}
     }
-    {
-        Time t("tranposeSelf() test");
-        for(int i = 0; i < ITERS; i++) tmat = mat.transposeSelf();
-    }
+
     printMatrix(mat);
+
+    MATRIX<float> e[6];
+    for(int i = 0; i < SQR_SIZE; i++) e[i] = identity<float>(SQUARE);
+
+    for(int i = 0; i < SQR_SIZE-1; i++){
+        e[i](i, i+1) = i+1;
+        e[i](i+1, i) = 1;
+        e[i](i+1, i+1) = i+2;
+    }
+
+    e[SQR_SIZE-1](SQR_SIZE-1, SQR_SIZE-1) = 1.f/7.f;
+
+    for(int i = 0; i < SQR_SIZE; i++) mat = e[i]*mat;
+
+    printMatrix(mat);
+    
+    //for(int i = 0; i < SQR_SIZE; i++) printMatrix(e[i]);
+
+    MATRIX<int> newMat = convert<float, int>(mat);
+    printMatrix(newMat);
+
+    
+
 }

@@ -63,7 +63,6 @@ namespace math{
             TYPE_U void operator=(const MATRIX<U>&&);            // Move operator
             TYPE_U MATRIX<T>& operator+=(const MATRIX<U>&);      // Add matrix to self
             TYPE_U MATRIX<T>& operator-=(const MATRIX<U>&);      // Subtract matrix from self
-            TYPE_U MATRIX<T>& operator*=(const MATRIX<U>&);      // Multiply matrix to self
             TYPE_U MATRIX<T>& operator*=(const U&);              // Multiply scalar to self
             TYPE_U MATRIX<T>& operator/=(const U&);              // Divide scalar to self
             // Arithmatic Operators ---------
@@ -80,11 +79,21 @@ namespace math{
             // Arithmatic functions ----------
             T& transposed(m_index, m_index) const;
             MATRIX<T> transpose() const;
-            /**/MATRIX<T>& transposeSelf();
+            MATRIX<T>& transposeSelf();
+            
             // Other functions ------------
             void fill(FillFunction);            // Fills The matrix with a pattern based off of position
             void fill(const T&);                // Fill the entire matrix with a single value
+            TYPE_U friend MATRIX<U> identity(m_index, m_index);
+            template<typename From, typename To> friend MATRIX<To> convert(const MATRIX<From>&);
     };
+
+    template<typename From, typename To>
+    MATRIX<To> convert(const MATRIX<From>& mat){
+        MATRIX<To> newMat(mat.rows, mat.columns);
+        for(int i = 0; i < mat.length; i++) newMat.matrix[i] = (To)mat.matrix[i];
+        return newMat;
+    }
 
     // =========== Matrix Class =================
 
@@ -263,19 +272,6 @@ namespace math{
     }
 
     // Operator*=
-    TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const MATRIX<U>& mat){
-
-        if(mat.rows != columns) throw DimensionException();
-
-        MATRIX<T> mat2 = (*this)*mat;
-        rows = mat2.rows;
-        columns = mat2.columns;
-        mat2.canDelete = false;
-        delete[] matrix;
-        matrix = mat2.matrix;
-        return (*this);
-    }
-
     TYPE_T TYPE_U MATRIX<T>& MATRIX<T>::operator*=(const U& c){
         for(int i = 0; i < length; i++) matrix[i] *= (T)c;
         return (*this);
@@ -457,7 +453,16 @@ namespace math{
     void MATRIX<T>::fill(const T& val){
         for(int i = 0; i < length; i++) matrix[i] = val;
     }
-
+    
+    /* identity
+    produces an identity matrix based on the given dimension
+    */
+    TYPE_U
+    MATRIX<U> identity(m_index rows, m_index columns){
+        MATRIX<U> mat(rows, columns);
+        mat.fill([](m_index i, m_index j){return (U)(i==j);});
+        return mat;
+    }
 }
 
 #endif
