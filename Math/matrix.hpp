@@ -31,7 +31,7 @@ namespace math{
                 return "The index that is trying to be read or written to is invalid";
             }
     };
-
+    
     TYPE_T
     class MATRIX final{                      // Template class; Cannot be inherited from
         private:
@@ -43,7 +43,7 @@ namespace math{
             typedef T (*FillFunction)(m_index, m_index);     // Used as argument type for 'fill' function
             void shiftElement(m_index, m_index, T*);         // Used by transposeSelf_rec()
             void transposeSelf_rec(m_index, m_index, T*);
-
+            TYPE_U friend class MATRIX;
         public:
             MATRIX(m_index = 0, m_index = 0);          // Constructor (takes in length and width of matrix)
             MATRIX(m_index, m_index, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
@@ -80,18 +80,18 @@ namespace math{
             T& transposed(m_index, m_index) const;
             MATRIX<T> transpose() const;
             MATRIX<T>& transposeSelf();
-            
             // Other functions ------------
             void fill(FillFunction);            // Fills The matrix with a pattern based off of position
             void fill(const T&);                // Fill the entire matrix with a single value
             TYPE_U friend MATRIX<U> identity(m_index, m_index);
             template<typename From, typename To> friend MATRIX<To> convert(const MATRIX<From>&);
+            TYPE_U operator MATRIX<U>() const;
     };
 
-    template<typename From, typename To>
-    MATRIX<To> convert(const MATRIX<From>& mat){
-        MATRIX<To> newMat(mat.rows, mat.columns);
-        for(int i = 0; i < mat.length; i++) newMat.matrix[i] = (To)mat.matrix[i];
+    TYPE_T TYPE_U
+    MATRIX<T>::operator MATRIX<U>() const{
+        MATRIX<U> newMat(rows, columns);
+        for(int i = 0; i < length; i++) newMat.matrix[i] = (U)matrix[i];
         return newMat;
     }
 
@@ -463,6 +463,17 @@ namespace math{
         mat.fill([](m_index i, m_index j){return (U)(i==j);});
         return mat;
     }
+    
+    /* convert
+    A cast function 
+    */
+    template<typename From, typename To>
+    MATRIX<To> convert(const MATRIX<From>& mat){
+        MATRIX<To> newMat(mat.rows, mat.columns);
+        for(int i = 0; i < mat.length; i++) newMat.matrix[i] = (To)mat.matrix[i];
+        return newMat;
+    }
+
 }
 
 #endif

@@ -4,6 +4,7 @@
 #include "matrix.hpp"
 //#include "..\Other\Time.hpp"
 
+
 using namespace math;
 
 void printTransposedMatrix(MATRIX<float>& m){
@@ -68,9 +69,6 @@ int main(int argv, char** argc){
     
     //for(int i = 0; i < SQR_SIZE; i++) printMatrix(e[i]);
 
-    MATRIX<int> newMat = convert<float, int>(mat);
-    printMatrix(newMat);
-
-    
+    printMatrix(mat);
 
 }
