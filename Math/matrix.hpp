@@ -47,6 +47,7 @@ namespace math{
         public:
             MATRIX(m_index = 0, m_index = 0);          // Constructor (takes in length and width of matrix)
             MATRIX(m_index, m_index, const T* const);  // Constructor (takes in length, width, and a pointer to an already allocated space of memory. Could be used to create constant matrices)
+            MATRIX(const char*);
             MATRIX(const MATRIX<T>&);                        // Copy Constructor (allocates new memory and copies matrix)
             ~MATRIX();               	                     // Destructor (frees the memory)
             // Getters ---------------
