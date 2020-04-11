@@ -44,7 +44,7 @@ math::MATRIX::MATRIX(const MATRIX& mat) :
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
 }
 
-/* Matrix Destrctor
+/* Matrix Destructor
 A very simple dtor that frees the memory pointed
 to by the 'matrix' variable. However, There are 
 situations where this should not be done. therefore,
@@ -245,7 +245,6 @@ math::MATRIX math::operator*(const MATRIX& m, const double& c){
     return mat;
 }
 
-
 math::MATRIX math::operator*(const double& c, const MATRIX& m){
     MATRIX mat(m.rows, m.columns);
     for(int i = 0; i < m.length; i++) mat.matrix[i] = m.matrix[i] * c;
@@ -253,8 +252,8 @@ math::MATRIX math::operator*(const double& c, const MATRIX& m){
 }
 
 /* Scalar Divisor
-Allows that matrix to be scaled up or down
-by some factor. This operator is non-commutative*/
+Allows that matrix to be divided by some factor.
+This operator is non-commutative */
 math::MATRIX math::operator/(const MATRIX& m, const double& c){
     MATRIX mat(m.rows, m.columns);
     for(int i = 0; i < m.length; i++) mat.matrix[i] = m.matrix[i] / c;
@@ -284,12 +283,24 @@ bool math::operator!=(const MATRIX& matA, const MATRIX& matB){
 
 // Arithmatic functions ============================
 
+/* transposed
+This function does not do any computations.
+It just provides an 'illusion' of transposing
+a matrix. It takes in the index of an element
+that you want to access in the tranposed version
+of the matrix and returns that value without
+alterring the contents of the matrix. */
 double& math::MATRIX::transposed(m_index i, m_index j) const{
     if(i >= columns || j >= rows) throw AccessViolationException();
     return matrix[j*columns + i];
 }
 
-
+/* transpose
+This function figures out the transpose
+of the matrix and returns another MATRIX
+object which carries the tranpose. Note
+that this does not change the contents
+of the original matrix. */
 math::MATRIX math::MATRIX::transpose() const{
     MATRIX mat(columns, rows);
     for(int i = 0; i < columns; i++)
@@ -298,6 +309,19 @@ math::MATRIX math::MATRIX::transpose() const{
     return mat;
 }
 
+/* det_rec
+This is the actual function that computes
+the determinent using recursion. Most of
+the checking is skipped as this function
+is only called by the memeber function
+determinent(). Here is how it workd:
+    > Check is 2x2
+    > If yes, return 2x2 determinent
+    > Else, initiate double det = 0;
+    > Calculate the determinent for each cofactor
+    > Add or Subtract that (depending on position) from det
+    > return det
+*/
 double math::MATRIX::det_rec(MATRIX& mat){
     if(mat.rows == 2) return mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0];
     MATRIX mat2(mat.rows-1, mat.columns-1);
@@ -314,6 +338,14 @@ double math::MATRIX::det_rec(MATRIX& mat){
     return det;
 }
 
+/* determinent
+This is a function for the user to compute
+the determinent of the matrix. However, the
+real calculation happens in the preceeding
+function det_rec(). All this function does
+is to check the size of the matrix and if
+everything looks good, it sends it off to
+det_rec(). */
 double math::MATRIX::determinant(){
     if(rows != columns) return 0;
     if(rows == 1) return matrix[0];
