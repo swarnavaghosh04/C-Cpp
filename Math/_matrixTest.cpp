@@ -4,7 +4,7 @@
 #include "matrix.hpp"
 //#include "..\Other\Time.hpp"
 
-void printTransposedMatrix(math::MATRIX& m){
+void printTransposedMatrix(const math::MATRIX& m){
     for(int i = 0; i < m.getTransposedRows(); i++){
         for(int j = 0; j < m.getTransposedColumns(); j++)
             printf("%-6.1f", m.transposed(i, j));
@@ -12,8 +12,10 @@ void printTransposedMatrix(math::MATRIX& m){
     }
 }
 
-void printMatrix(math::MATRIX& m){
+void printMatrix(const math::MATRIX& m, const char* message = ""){
+    printf("%s:\n", message);
     for(int i = 0; i < m.getRows(); i++){
+        printf("\t");
         for(int j = 0; j < m.getColumns(); j++)
             printf("%-6.1f", m(i, j));
         std::cout << std::endl;
@@ -21,16 +23,9 @@ void printMatrix(math::MATRIX& m){
     std::cout << std::endl;
 }
 
-#define ITERS 10000
-#define SQR_SIZE 6
-#define SQUARE SQR_SIZE, SQR_SIZE
-
 int main(int argv, char** argc){
-
-    double dp[] = {1., 2., 3., 4., 5., 6., 7., 8.};
-    math::MATRIX mat = {2, 4, dp};
-    math::MATRIX mat2 = {2, 3};
-    mat2 = mat.transpose()*mat;
-    printMatrix(mat2);
-
+    const double dp[] = {1.,2,7,8,5,6,7,3,9,10,11,12,13,14,15,16};
+    const math::MATRIX mat1 = {4, 4, dp};
+    printMatrix(mat1, "A");
+    printf("|A| = %.4f\n", mat1.determinant());
 }

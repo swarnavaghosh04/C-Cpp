@@ -62,7 +62,7 @@ regulate that (See move operator for more details). */
 math::MATRIX::~MATRIX(){
     if(canDelete) { 
         delete[] matrix;
-        //std::cout << "DESTROYED" <<std::endl;
+        std::cout << "DESTROYED" <<std::endl;
     }
 }
 
@@ -99,7 +99,7 @@ However, this is not as safe as the next
 function as this can access memeory that
 is beyond the range of allocated memory*/
 double* math::MATRIX::operator[](m_index row) const{
-    return matrix + (row*columns);
+    return (matrix + (row*columns));
 }
 
 /* Operator ()    (safe)
@@ -126,7 +126,7 @@ void math::MATRIX::operator=(const MATRIX& mat){
         rows = mat.rows;
         columns = mat.columns;
         length = mat.length;
-        delete[] matrix;
+        if(canDelete) delete[] matrix;
         matrix = new double[length];
     }
     // Copy over the matrix
@@ -146,12 +146,13 @@ void math::MATRIX::operator=(const MATRIX&& mat){
     rows = mat.rows;
     columns = mat.columns;
     length = mat.length;
+    if(canDelete) delete[] matrix;   // Deallocate this matrix
+    canDelete = mat.canDelete;       // Copy over delete flag
     /*since mat is going to get destroyed after the function
     terminates, the matrix is going to get deallocated.
     To prevent this, mat.canDelete is set to false as we are
     going to assign the mat's matrix to this matrix */
     mat.canDelete = false;
-    delete[] matrix;                 // Deallocate this matrix
     matrix = mat.matrix;             // Assign mat's matrix to this matrix
 }
 
@@ -326,17 +327,22 @@ determinent(). Here is how it workd:
     > Add or Subtract that (depending on position) from det
     > return det
 */
-double math::MATRIX::det_rec(MATRIX& mat){
-    if(mat.rows == 2) return mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0];
+
+extern void printMatrix(const math::MATRIX&, const char* m="");
+
+double math::MATRIX::det_rec(const MATRIX& mat) const{
+    if(mat.rows == 2) return ((mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]));
     MATRIX mat2(mat.rows-1, mat.columns-1);
     double det = 0;
     for(int i = 0; i < mat.columns; i++){
         for(int j = mat.columns, index = 0; j < mat.length; j++){
-            if((j-mat.columns-i)%mat.columns != 0){
+            if((j-i)%mat.columns != 0){
                 mat2.matrix[index] = mat.matrix[j];
                 index++;
             }
         }
+        printf("%d", i);
+        printMatrix(mat2);
         det += (i%2?-1:1)*mat[0][i]*det_rec(mat2);
     }
     return det;
@@ -345,15 +351,19 @@ double math::MATRIX::det_rec(MATRIX& mat){
 /* determinent
 This is a function for the user to compute
 the determinent of the matrix. However, the
-real calculation happens in the preceeding
+real calculation happens in the private
 function det_rec(). All this function does
 is to check the size of the matrix and if
 everything looks good, it sends it off to
 det_rec(). */
-double math::MATRIX::determinant(){
+double math::MATRIX::determinant() const{
     if(rows != columns) return 0;
     if(rows == 1) return matrix[0];
     return det_rec(*this);
+}
+
+math::MATRIX math::MATRIX::rref() const{
+
 }
 
 // Other functions ===================================
