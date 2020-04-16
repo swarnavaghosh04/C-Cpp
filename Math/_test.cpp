@@ -11,7 +11,7 @@ class Hello{
             return (*this);
         }
 
-}
+};
 
 int main(int argc, const char** argv){
 

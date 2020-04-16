@@ -8,6 +8,14 @@ const char* math::AccessViolationException::what() const throw(){
     return "The index that is trying to be read or written to is invalid";
 }
 
+const char* math::MatrixInitializationSizeError::what() const throw(){
+    return "The matrix trying to be initalized is too big";
+}
+
+const char* math::MatrixInitializationDimensionError::what() const throw(){
+    return "The matrix trying to be initalized is invalid due to incompatible row and column dimensions";
+}
+
 // =========== Matrix Class =================
 
 /* Matix Constructor (rows, columns):
@@ -18,7 +26,7 @@ math::MATRIX::MATRIX(m_index rows, m_index columns) :
     rows(rows), 
     columns(columns),
     length(rows*columns)
-{ matrix = new double[length]; /*std::cout << "CONSTRUCT" << std::endl;*/ }
+{ matrix = new double[length]; } /*std::cout << "CONSTRUCT" << std::endl;*/
 
 /* Matrix Constructor (rows, columns, pointer to 1D heap allocated memory)
 This constructor not only takes in the dimensions of the matrix, but also
@@ -28,7 +36,8 @@ math::MATRIX::MATRIX(m_index rows, m_index columns, const double* const matrixPo
     rows(rows), 
     columns(columns),
     length(rows*columns),
-    matrix((double*)matrixPointer)
+    matrix((double*)matrixPointer),
+    canDelete(false)
 { /*std::cout << "CONSTRUCT" << std::endl;*/ }
 
 /* Copy Constructor (allocates new memory and copies matrix; performs deep copy)
@@ -39,7 +48,7 @@ math::MATRIX::MATRIX(const MATRIX& mat) :
     columns(mat.columns),
     length(mat.length)
 {
-    //std::cout << "COPY" << std::endl;
+    std::cout << "COPY" << std::endl;
     matrix = new double[length];
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
 }
@@ -61,15 +70,15 @@ math::MATRIX::~MATRIX(){
 
 // Get Rows
 
-int math::MATRIX::getRows() const{ return rows; }
+unsigned int math::MATRIX::getRows() const{ return rows; }
 
 // Get Columns
 
-int math::MATRIX::getColumns() const{ return columns; }
+unsigned int math::MATRIX::getColumns() const{ return columns; }
 
 // Get Length
 
-int math::MATRIX::getLength() const{ return length; }
+unsigned int math::MATRIX::getLength() const{ return length; }
 
 // Get Matrix
 
@@ -89,7 +98,6 @@ the value at row 'i' and column 'j' of 'm'.
 However, this is not as safe as the next
 function as this can access memeory that
 is beyond the range of allocated memory*/
-
 double* math::MATRIX::operator[](m_index row) const{
     return matrix + (row*columns);
 }
@@ -101,7 +109,6 @@ It allows the user to access row 'i' and column
 m(i, j)
 If 'i' and 'j' are not valid, then this function
 throws an instance of 'AccessViolationException' */
-
 double& math::MATRIX::operator()(m_index i, m_index j) const{
     if(i >= rows || j >= columns) throw AccessViolationException();
     return matrix[i*columns + j];
@@ -109,7 +116,6 @@ double& math::MATRIX::operator()(m_index i, m_index j) const{
 
 /* Operator= (assign)
 Performs deep copy of entire matrix*/
-
 void math::MATRIX::operator=(const MATRIX& mat){
     //std::cout << "ASSIGN" << std::endl;
     /* If the two matrices do not have the
@@ -136,12 +142,10 @@ that the two objects are not of the same template
 type, then the entire thing is ran through a
 re-casting loop */
 void math::MATRIX::operator=(const MATRIX&& mat){
-    //std::cout << "MOVE" << std::endl;
-    if(rows != mat.rows || columns != mat.columns){         // update dimension specifying member sif necessary
-        rows = mat.rows;
-        columns = mat.columns;
-        length = mat.length;
-    }
+    std::cout << "MOVE" << std::endl;
+    rows = mat.rows;
+    columns = mat.columns;
+    length = mat.length;
     /*since mat is going to get destroyed after the function
     terminates, the matrix is going to get deallocated.
     To prevent this, mat.canDelete is set to false as we are

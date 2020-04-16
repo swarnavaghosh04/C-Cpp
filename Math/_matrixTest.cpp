@@ -20,16 +20,17 @@ void printMatrix(math::MATRIX& m){
     }
     std::cout << std::endl;
 }
+
 #define ITERS 10000
 #define SQR_SIZE 6
 #define SQUARE SQR_SIZE, SQR_SIZE
 
 int main(int argv, char** argc){
 
-    const double mat_matrix[] = {1,1,1,2,2,2,2,3,3,3,3,4,4,3,3,4,2,1,1,1,6,5,3,2,2};
-    math::MATRIX mat(5, 5, mat_matrix);
-
-    printMatrix(mat);
-    printf("Determinent: %.1f\n", mat.determinant());
+    double dp[] = {1., 2., 3., 4., 5., 6., 7., 8.};
+    math::MATRIX mat = {2, 4, dp};
+    math::MATRIX mat2 = {2, 3};
+    mat2 = mat.transpose()*mat;
+    printMatrix(mat2);
 
 }
