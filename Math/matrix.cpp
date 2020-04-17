@@ -366,6 +366,11 @@ double math::MATRIX::determinant() const{
     return det_rec(*this);
 }
 
+/*
+math::MATRIX math::MATRIX::ref(bool flag=0) const{
+    MATRIX* 
+}
+*/
 // Other functions ===================================
 
 /* Fill matrix - overload 2

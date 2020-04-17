@@ -10,6 +10,8 @@
 #include <iostream>
 #include <exception>
 
+#define SELF 1
+
 typedef const unsigned int& m_index;
 
 namespace math{
@@ -83,7 +85,7 @@ namespace math{
             void rowop(m_index, m_index, Function);
             template<typename Function>
             void colop(m_index, m_index, Function);
-            MATRIX ref() const;                           // Return new matrix in reduced-row-echelon form
+            MATRIX ref(bool) const;                       // Return new matrix in row-echelon form
             // Other functions ------------
             template<typename Function>
             void fill(Function);                // Fills The matrix with a pattern based off of position
