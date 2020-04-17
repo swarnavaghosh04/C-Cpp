@@ -41,7 +41,6 @@ namespace math{
             unsigned int length;                                // Number of rows x number of columns = total length of the matrix
             double* matrix;                                     // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;                      // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
-            typedef double (*FillFunction)(m_index, m_index);   // Used as argument type for 'fill' function
             double det_rec(const MATRIX&) const;                // The recursion function for finding determinent
         public:
             MATRIX(m_index = 0, m_index = 0);                   // Constructor (takes in length and width of matrix)
@@ -52,6 +51,7 @@ namespace math{
             unsigned int getRows() const;     	                // Returns the number of rows
             unsigned int getColumns() const;  	                // Returns the number of column
             unsigned int getLength() const;   	                // Returns the total length of the matrix (rows x columns)
+            bool getCanDelete() const;
             const double* const getMatrix() const;              // Returns the location of the matrix
             int getTransposedRows() const;
             int getTransposedColumns() const;
@@ -79,10 +79,16 @@ namespace math{
             double& transposed(m_index, m_index) const;   // Pseudo Transpose
             MATRIX transpose() const;                     // Returns new transposed matrix
             double determinant() const;                   // Returns determinent of matrix
-            MATRIX rref() const;                          // Return new matrix in reduced-row-echelon form
+            template<typename Function> 
+            void rowop(m_index, m_index, Function);
+            template<typename Function>
+            void colop(m_index, m_index, Function);
+            MATRIX ref() const;                           // Return new matrix in reduced-row-echelon form
             // Other functions ------------
-            void fill(FillFunction);            // Fills The matrix with a pattern based off of position
+            template<typename Function>
+            void fill(Function);                // Fills The matrix with a pattern based off of position
             void fill(const double&);           // Fill the entire matrix with a single value
+            static MATRIX identity(m_index, m_index=0);
     };
     
     MATRIX operator+(const MATRIX&, const MATRIX&);    // Add matrices
@@ -95,9 +101,36 @@ namespace math{
     bool operator==(const MATRIX&, const MATRIX&);     // Equals
     bool operator!=(const MATRIX&, const MATRIX&);     // Not Equals
 
-    MATRIX identity(m_index, m_index);
-
 }
 
+// Template Functions ============================
+
+template<typename Function>
+void math::MATRIX::rowop(m_index row1, m_index rows2, Function func){
+    for(int i = 0; i < columns; i++)
+        (*this)[row1][i] = func((*this)[row1][i],(*this)[rows2][i]);
+}
+
+template<typename Function>
+void math::MATRIX::colop(m_index col1, m_index col2, Function func){
+    for(int i = 0; i < rows; i++)
+        (*this)[i][col1] = func((*this)[i][col1],(*this)[i][col2]);
+}
+
+/* Fill matrix - overload 1
+This is one of two overloaded functions that help
+fill the matrix. This particular function has a
+function pointer as its argument. This function
+pointed to by the argument should have two
+arguments of type m_index (const int&) and return
+a value of type T. essentially what this
+function does, to summuerize in one equation:
+matrix[i][j] = func(i, j) where func is the argument. */
+template<typename Function>
+void math::MATRIX::fill(Function func){
+    for(int i = 0; i < rows; i++)
+        for(int j = 0; j < columns; j++)
+            (*this)[i][j] = func(i, j);
+}
 
 #endif

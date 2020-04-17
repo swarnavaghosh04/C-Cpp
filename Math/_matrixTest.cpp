@@ -12,7 +12,7 @@ void printTransposedMatrix(const math::MATRIX& m){
     }
 }
 
-void printMatrix(const math::MATRIX& m, const char* message = ""){
+void printMatrix(const math::MATRIX& m, const char* message = "matrix"){
     printf("%s:\n", message);
     for(int i = 0; i < m.getRows(); i++){
         printf("\t");
@@ -24,8 +24,20 @@ void printMatrix(const math::MATRIX& m, const char* message = ""){
 }
 
 int main(int argv, char** argc){
-    const double dp[] = {1.,2,7,8,5,6,7,3,9,10,11,12,13,14,15,16};
-    const math::MATRIX mat1 = {4, 4, dp};
-    printMatrix(mat1, "A");
-    printf("|A| = %.4f\n", mat1.determinant());
+    char mat[20];
+
+    double matMem[] = {1.,2,3,4};
+    
+    for(int i = 0; i < 4; i++) matMem[i] = (double)(i+1);
+
+    *(unsigned int*)mat = 2;
+    *(unsigned int*)&mat[4] = 2;
+    *(unsigned int*)&mat[8] = 4;
+    *(double**)&mat[12] = (double*)matMem;
+    *(int*)&mat[16] = 0;
+
+    math::MATRIX matr = *(math::MATRIX*)mat;
+
+    printMatrix(matr);
+    std::cout << matr.getCanDelete() << std::endl;
 }

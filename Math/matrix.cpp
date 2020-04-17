@@ -1,5 +1,7 @@
 #include ".\\matrix.hpp"
 
+#define DEBUG 1            // notifies when copy, move, or destructor are invoked
+
 const char* math::DimensionException::what() const throw(){
     return "The dimensions of the matrices are not compatible with the specified operation";;
 }
@@ -38,7 +40,7 @@ math::MATRIX::MATRIX(m_index rows, m_index columns, const double* const matrixPo
     length(rows*columns),
     matrix((double*)matrixPointer),
     canDelete(false)
-{ /*std::cout << "CONSTRUCT" << std::endl;*/ }
+{}
 
 /* Copy Constructor (allocates new memory and copies matrix; performs deep copy)
 The copy constructor invokes a deep copy. it creates a new matrix by copying
@@ -48,7 +50,9 @@ math::MATRIX::MATRIX(const MATRIX& mat) :
     columns(mat.columns),
     length(mat.length)
 {
+    #if DEBUG
     std::cout << "COPY" << std::endl;
+    #endif
     matrix = new double[length];
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
 }
@@ -62,27 +66,27 @@ regulate that (See move operator for more details). */
 math::MATRIX::~MATRIX(){
     if(canDelete) { 
         delete[] matrix;
+        #if DEBUG
         std::cout << "DESTROYED" <<std::endl;
+        #endif
     }
 }
 
 // Getters =======================================
 
 // Get Rows
-
 unsigned int math::MATRIX::getRows() const{ return rows; }
 
 // Get Columns
-
 unsigned int math::MATRIX::getColumns() const{ return columns; }
 
 // Get Length
-
 unsigned int math::MATRIX::getLength() const{ return length; }
 
 // Get Matrix
-
 const double* const math::MATRIX::getMatrix() const{ return matrix; }
+
+bool math::MATRIX::getCanDelete()const {return canDelete;}
 
 int math::MATRIX::getTransposedRows() const{ return columns; }
 
@@ -117,7 +121,9 @@ double& math::MATRIX::operator()(m_index i, m_index j) const{
 /* Operator= (assign)
 Performs deep copy of entire matrix*/
 void math::MATRIX::operator=(const MATRIX& mat){
-    //std::cout << "ASSIGN" << std::endl;
+    #if DEBUG
+    std::cout << "ASSIGN" << std::endl;
+    #endif
     /* If the two matrices do not have the
     same dimensions, deallocate this matrix,
     and allocate a new chunck of memory of
@@ -142,7 +148,9 @@ that the two objects are not of the same template
 type, then the entire thing is ran through a
 re-casting loop */
 void math::MATRIX::operator=(const MATRIX&& mat){
+    #if DEBUG
     std::cout << "MOVE" << std::endl;
+    #endif
     rows = mat.rows;
     columns = mat.columns;
     length = mat.length;
@@ -328,8 +336,6 @@ determinent(). Here is how it workd:
     > return det
 */
 
-extern void printMatrix(const math::MATRIX&, const char* m="");
-
 double math::MATRIX::det_rec(const MATRIX& mat) const{
     if(mat.rows == 2) return ((mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]));
     MATRIX mat2(mat.rows-1, mat.columns-1);
@@ -341,8 +347,6 @@ double math::MATRIX::det_rec(const MATRIX& mat) const{
                 index++;
             }
         }
-        printf("%d", i);
-        printMatrix(mat2);
         det += (i%2?-1:1)*mat[0][i]*det_rec(mat2);
     }
     return det;
@@ -362,42 +366,20 @@ double math::MATRIX::determinant() const{
     return det_rec(*this);
 }
 
-math::MATRIX math::MATRIX::rref() const{
-
-}
-
 // Other functions ===================================
-
-/* Fill matrix - overload 1
-This is one of two overloaded functions that help
-fill the matrix. This particular function has a
-function pointer as its argument. This function
-pointed to by the argument should have two
-arguments of type m_index (const int&) and return
-a value of type T. essentially what this
-function does, to summuerize in one equation:
-matrix[i][j] = func(i, j) where func is the argument. */
-
-void math::MATRIX::fill(FillFunction func){
-    for(int i = 0; i < rows; i++)
-        for(int j = 0; j < columns; j++)
-            (*this)[i][j] = func(i, j);
-}
 
 /* Fill matrix - overload 2
 This is the second overloaded function of the previous
 one. It just fill the entire matrix with a constant value
 specified by the argument. */
-
 void math::MATRIX::fill(const double& val){
     for(int i = 0; i < length; i++) matrix[i] = val;
 }
 
 /* identity
-produces an identity matrix based on the given dimension
-*/
-math::MATRIX math::identity(m_index rows, m_index columns){
-    MATRIX mat(rows, columns);
+produces an identity matrix based on the given dimension */
+math::MATRIX math::MATRIX::identity(m_index rows, m_index columns){
+    MATRIX mat(rows, (columns==0?rows:columns));
     mat.fill([](m_index i, m_index j){return (double)(i==j);});
     return mat;
 }
