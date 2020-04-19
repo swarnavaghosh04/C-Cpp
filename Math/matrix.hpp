@@ -10,8 +10,6 @@
 #include <iostream>
 #include <exception>
 
-#define SELF 1
-
 typedef const unsigned int& m_index;
 
 namespace math{
@@ -85,7 +83,8 @@ namespace math{
             void rowop(m_index, m_index, Function);
             template<typename Function>
             void colop(m_index, m_index, Function);
-            MATRIX ref(bool) const;                       // Return new matrix in row-echelon form
+            MATRIX ref() const;                            // Returns new matrix in row-echelon form
+            MATRIX rref(MATRIX* = nullptr) const;          // Returns new matrix in reduced-row-echelon form
             // Other functions ------------
             template<typename Function>
             void fill(Function);                // Fills The matrix with a pattern based off of position
@@ -108,15 +107,17 @@ namespace math{
 // Template Functions ============================
 
 template<typename Function>
-void math::MATRIX::rowop(m_index row1, m_index rows2, Function func){
+void math::MATRIX::rowop(m_index row1, m_index row2, Function func){
+    if(row1 >= rows || row2 >= rows) throw AccessViolationException();
     for(int i = 0; i < columns; i++)
-        (*this)[row1][i] = func((*this)[row1][i],(*this)[rows2][i]);
+        func((*this)[row1][i],(*this)[row2][i]);
 }
 
 template<typename Function>
 void math::MATRIX::colop(m_index col1, m_index col2, Function func){
+    if(col1 >= columns || col2 >= columns) throw AccessViolationException();
     for(int i = 0; i < rows; i++)
-        (*this)[i][col1] = func((*this)[i][col1],(*this)[i][col2]);
+        func((*this)[i][col1],(*this)[i][col2]);
 }
 
 /* Fill matrix - overload 1

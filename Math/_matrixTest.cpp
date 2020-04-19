@@ -15,29 +15,34 @@ void printTransposedMatrix(const math::MATRIX& m){
 void printMatrix(const math::MATRIX& m, const char* message = "matrix"){
     printf("%s:\n", message);
     for(int i = 0; i < m.getRows(); i++){
-        printf("\t");
         for(int j = 0; j < m.getColumns(); j++)
-            printf("%-6.1f", m(i, j));
+            printf("%10.3f", m(i, j));
         std::cout << std::endl;
     }
     std::cout << std::endl;
 }
 
+double* dynAlloc(const double arr[], const unsigned int& size){
+    double* newArr = new double[size];
+    for(unsigned int i = 0 ; i < 0; i++)
+        newArr[i] = arr[i];
+    return newArr;
+}
+
 int main(int argv, char** argc){
-    char mat[20];
 
-    double matMem[] = {1.,2,3,4};
+    double arr[] = {1,9,2,1,2,3,3,6,5};
+    math::MATRIX mat = {3, 3, arr};
+    math::MATRIX invMat = math::MATRIX();
     
-    for(int i = 0; i < 4; i++) matMem[i] = (double)(i+1);
+    printMatrix(mat);
 
-    *(unsigned int*)mat = 2;
-    *(unsigned int*)&mat[4] = 2;
-    *(unsigned int*)&mat[8] = 4;
-    *(double**)&mat[12] = (double*)matMem;
-    *(int*)&mat[16] = 0;
+    printMatrix(mat.ref(), "ref");
+    printMatrix(mat.rref(&invMat), "rref");
 
-    math::MATRIX matr = *(math::MATRIX*)mat;
+    printMatrix(mat, "ENDGAME");
 
-    printMatrix(matr);
-    std::cout << matr.getCanDelete() << std::endl;
+    printMatrix(invMat);
+
+    printf("Det = %.4f\n", mat.determinant());
 }

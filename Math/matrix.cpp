@@ -1,4 +1,5 @@
 #include ".\\matrix.hpp"
+#include <stdio.h>
 
 #define DEBUG 1            // notifies when copy, move, or destructor are invoked
 
@@ -28,7 +29,7 @@ math::MATRIX::MATRIX(m_index rows, m_index columns) :
     rows(rows), 
     columns(columns),
     length(rows*columns)
-{ matrix = new double[length]; } /*std::cout << "CONSTRUCT" << std::endl;*/
+{ matrix = (length==0?nullptr:new double[length]); } /*std::cout << "CONSTRUCT" << std::endl;*/
 
 /* Matrix Constructor (rows, columns, pointer to 1D heap allocated memory)
 This constructor not only takes in the dimensions of the matrix, but also
@@ -53,7 +54,7 @@ math::MATRIX::MATRIX(const MATRIX& mat) :
     #if DEBUG
     std::cout << "COPY" << std::endl;
     #endif
-    matrix = new double[length];
+    matrix = (length==0?nullptr:new double[length]);
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
 }
 
@@ -133,7 +134,7 @@ void math::MATRIX::operator=(const MATRIX& mat){
         columns = mat.columns;
         length = mat.length;
         if(canDelete) delete[] matrix;
-        matrix = new double[length];
+        matrix = (length==0?nullptr:new double[length]);
     }
     // Copy over the matrix
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
@@ -366,11 +367,62 @@ double math::MATRIX::determinant() const{
     return det_rec(*this);
 }
 
-/*
-math::MATRIX math::MATRIX::ref(bool flag=0) const{
-    MATRIX* 
+extern void printMatrix(const math::MATRIX&, const char* message = "matrix");
+
+math::MATRIX math::MATRIX::ref() const{
+    MATRIX refMat(rows, columns);
+    for(int i = 0; i < length; i++) refMat.matrix[i] = matrix[i];
+    double m;
+    unsigned int condition = (rows<columns?rows:columns);
+    for(unsigned int j = 0; j < condition; j++){
+        if(refMat[j][j] == 0) continue;
+        for(unsigned int i = j+1; i < rows; i++){
+            if(refMat[i][j] == 0) continue;
+            m = refMat[i][j]/refMat[j][j];
+            refMat.rowop(i, j, [&](double& r1, double& r2){
+                r1 = (r1 - r2*m);});
+            printMatrix(refMat, "refMat op");
+        }
+    }
+    return refMat;
 }
-*/
+
+math::MATRIX math::MATRIX::rref(MATRIX* inv) const{
+    MATRIX rrefMat(rows, columns);
+    if(rows==columns) *inv = identity(rows);
+    else{
+        *inv = MATRIX();
+        inv = nullptr;
+    }
+    for(int i = 0; i < length; i++) rrefMat.matrix[i] = matrix[i];
+    double m;
+    unsigned int condition = (rows<columns?rows:columns);
+    for(unsigned int j = 0; j < condition; j++){
+        if(rrefMat[j][j] == 0){
+            *inv = MATRIX();      // deallocate matrix
+            inv = nullptr;        // make nullptr
+            continue;
+        }
+        for(unsigned int i = 0; i < rows; i++){
+            if(i == j || rrefMat[i][j] == 0) continue;
+            m = rrefMat[i][j]/rrefMat[j][j];
+            rrefMat.rowop(i, j, [&](double& r1, double& r2){
+                r1 = (r1 - r2*m); });
+            if(inv != nullptr)
+                inv->rowop(i, j, [&](double& r1,double& r2){
+                    r1 = (r1-r2*m); });
+            printMatrix(rrefMat, "rrefMat op");
+        }
+    }
+    if(inv != nullptr){
+        for(int i = 0; i < rows;i++){
+            m = rrefMat[i][i];
+            inv->rowop(i, i, [&](double& r, double& na){ r = r/m;});
+        }
+    }
+    return rrefMat;
+}
+
 // Other functions ===================================
 
 /* Fill matrix - overload 2
