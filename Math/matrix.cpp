@@ -19,6 +19,10 @@ const char* math::MatrixInitializationDimensionError::what() const throw(){
     return "The matrix trying to be initalized is invalid due to incompatible row and column dimensions";
 }
 
+const char* math::MatrixInverseComputationError::what() const throw(){
+    return "An error occured while computing the inverse of a matrix";
+}
+
 // =========== Matrix Class =================
 
 /* Matix Constructor (rows, columns):
@@ -381,25 +385,25 @@ math::MATRIX math::MATRIX::ref() const{
             m = refMat[i][j]/refMat[j][j];
             refMat.rowop(i, j, [&](double& r1, double& r2){
                 r1 = (r1 - r2*m);});
-            printMatrix(refMat, "refMat op");
         }
     }
     return refMat;
 }
 
-math::MATRIX math::MATRIX::rref(MATRIX* inv) const{
-    MATRIX rrefMat(rows, columns);
-    if(rows==columns) *inv = identity(rows);
-    else{
+math::MATRIX math::MATRIX::rref(MATRIX* inv, bool invFlag) const{
+    if(rows!=columns){
         *inv = MATRIX();
+        if(invFlag) throw MatrixInverseComputationError();
         inv = nullptr;
-    }
+    }else *inv = identity(rows);
+    MATRIX rrefMat(rows, columns);
     for(int i = 0; i < length; i++) rrefMat.matrix[i] = matrix[i];
     double m;
     unsigned int condition = (rows<columns?rows:columns);
     for(unsigned int j = 0; j < condition; j++){
         if(rrefMat[j][j] == 0){
             *inv = MATRIX();      // deallocate matrix
+            if(invFlag) throw MatrixInverseComputationError();
             inv = nullptr;        // make nullptr
             continue;
         }
@@ -411,7 +415,6 @@ math::MATRIX math::MATRIX::rref(MATRIX* inv) const{
             if(inv != nullptr)
                 inv->rowop(i, j, [&](double& r1,double& r2){
                     r1 = (r1-r2*m); });
-            printMatrix(rrefMat, "rrefMat op");
         }
     }
     if(inv != nullptr){
@@ -421,6 +424,12 @@ math::MATRIX math::MATRIX::rref(MATRIX* inv) const{
         }
     }
     return rrefMat;
+}
+
+math::MATRIX math::MATRIX::inverse() const{
+    MATRIX inv = MATRIX();
+    this->rref(&inv, true);
+    return inv;
 }
 
 // Other functions ===================================

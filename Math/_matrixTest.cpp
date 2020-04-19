@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstdlib>
 #include "matrix.hpp"
+#include <exception>
 //#include "..\Other\Time.hpp"
 
 void printTransposedMatrix(const math::MATRIX& m){
@@ -31,18 +32,24 @@ double* dynAlloc(const double arr[], const unsigned int& size){
 
 int main(int argv, char** argc){
 
-    double arr[] = {1,9,2,1,2,3,3,6,5};
-    math::MATRIX mat = {3, 3, arr};
-    math::MATRIX invMat = math::MATRIX();
-    
-    printMatrix(mat);
+    double matArr[] = {1,9,2,1,2,3,3,6,5};
+    double vectArr[] = {2,4,5};
 
-    printMatrix(mat.ref(), "ref");
-    printMatrix(mat.rref(&invMat), "rref");
+    const math::MATRIX mat = {3, 3, matArr};
+    const math::MATRIX vect = {3,1, vectArr};
 
-    printMatrix(mat, "ENDGAME");
+    math::MATRIX invMat = mat.inverse();
 
-    printMatrix(invMat);
+    try{
+        
+        math::MATRIX vect2 = mat*vect;
+        printMatrix(vect2, "A*v = w");
+        math::MATRIX vect3 = invMat*vect2;
+        printMatrix(vect3, "A^-1*w = v");
+        
+    } catch(std::exception& e){
+        std::cout << e.what() << std::endl;
+    }
 
-    printf("Det = %.4f\n", mat.determinant());
+    printf("\nDet = %.4f\n", mat.determinant());
 }

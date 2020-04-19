@@ -10,6 +10,8 @@
 #include <iostream>
 #include <exception>
 
+#define FUNCTION_TYPE template<typename Function>
+
 typedef const unsigned int& m_index;
 
 namespace math{
@@ -30,6 +32,11 @@ namespace math{
     };
 
     class MatrixInitializationDimensionError : public std::exception{
+        public:
+            const char* what() const throw();
+    };
+
+    class MatrixInverseComputationError : public std::exception{
         public:
             const char* what() const throw();
     };
@@ -79,16 +86,14 @@ namespace math{
             double& transposed(m_index, m_index) const;   // Pseudo Transpose
             MATRIX transpose() const;                     // Returns new transposed matrix
             double determinant() const;                   // Returns determinent of matrix
-            template<typename Function> 
-            void rowop(m_index, m_index, Function);
-            template<typename Function>
-            void colop(m_index, m_index, Function);
-            MATRIX ref() const;                            // Returns new matrix in row-echelon form
-            MATRIX rref(MATRIX* = nullptr) const;          // Returns new matrix in reduced-row-echelon form
+            FUNCTION_TYPE void rowop(m_index, m_index, Function);
+            FUNCTION_TYPE void colop(m_index, m_index, Function);
+            MATRIX ref() const;                                        // Returns new matrix in row-echelon form
+            MATRIX rref(MATRIX* = nullptr, bool = false) const;        // Returns new matrix in reduced-row-echelon form
+            MATRIX inverse() const;                                    // Returns the inverse of the matrix
             // Other functions ------------
-            template<typename Function>
-            void fill(Function);                // Fills The matrix with a pattern based off of position
-            void fill(const double&);           // Fill the entire matrix with a single value
+            FUNCTION_TYPE void fill(Function);                // Fills The matrix with a pattern based off of position
+            void fill(const double&);                         // Fill the entire matrix with a single value
             static MATRIX identity(m_index, m_index=0);
     };
     
@@ -106,14 +111,14 @@ namespace math{
 
 // Template Functions ============================
 
-template<typename Function>
+FUNCTION_TYPE
 void math::MATRIX::rowop(m_index row1, m_index row2, Function func){
     if(row1 >= rows || row2 >= rows) throw AccessViolationException();
     for(int i = 0; i < columns; i++)
         func((*this)[row1][i],(*this)[row2][i]);
 }
 
-template<typename Function>
+FUNCTION_TYPE
 void math::MATRIX::colop(m_index col1, m_index col2, Function func){
     if(col1 >= columns || col2 >= columns) throw AccessViolationException();
     for(int i = 0; i < rows; i++)
@@ -129,7 +134,7 @@ arguments of type m_index (const int&) and return
 a value of type T. essentially what this
 function does, to summuerize in one equation:
 matrix[i][j] = func(i, j) where func is the argument. */
-template<typename Function>
+FUNCTION_TYPE
 void math::MATRIX::fill(Function func){
     for(int i = 0; i < rows; i++)
         for(int j = 0; j < columns; j++)
