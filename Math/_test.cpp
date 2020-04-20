@@ -1,20 +1,14 @@
 #define SOMETHING "hello"
 #include <iostream>
 
-class Hello{
-    int a, b;
-    public:
-        Hello(int a=0, int b=0) : a(a), b(b){}
-        Hello& operator+=(int v){
-            a+=v;
-            b+=v;
-            return (*this);
-        }
-
-};
+void printSomething(int num){
+	printf("This is my number %d\n", num);
+	return;
+}
 
 int main(int argc, const char** argv){
 
-    std::cout << "This is SOMETHING" << std::endl;
+    std::cout << "This is SOMETHING BIG!" << std::endl;
+    printSomething(7);
     return 0;
 }

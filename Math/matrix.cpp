@@ -1,7 +1,8 @@
 #include ".\\matrix.hpp"
 #include <stdio.h>
 
-#define DEBUG 1            // notifies when copy, move, or destructor are invoked
+
+//#define DEBUG
 
 const char* math::DimensionException::what() const throw(){
     return "The dimensions of the matrices are not compatible with the specified operation";;
@@ -25,27 +26,36 @@ const char* math::MatrixInverseComputationError::what() const throw(){
 
 // =========== Matrix Class =================
 
-/* Matix Constructor (rows, columns):
-This constructor is very simple. It just takes
-in the dimensions of the matrix and dynamically
-allocates that much space. */
+/** Matrix Constructor (rows, colummns)
+ * Dynamically allocates double array of length rows*columns.
+ * Allocation will be deleted by destructor.
+*/
 math::MATRIX::MATRIX(m_index rows, m_index columns) : 
     rows(rows), 
     columns(columns),
     length(rows*columns)
-{ matrix = (length==0?nullptr:new double[length]); } /*std::cout << "CONSTRUCT" << std::endl;*/
+{   
+    #ifdef DEBUG
+    printf("CONSTRUCTED: %dx%d @ 0x%x\n", rows, columns, this);
+    #endif 
+    matrix = (length==0?nullptr:new double[length]);
+}
 
-/* Matrix Constructor (rows, columns, pointer to 1D heap allocated memory)
-This constructor not only takes in the dimensions of the matrix, but also
-takes in the address of a previously allocated block of memory of the
-specified size. This could be used to make constant matrices. */
+/** Matrix Constructor (rows, columns, array)
+ * Takes in pre-initiated array of double of length rows*columns.
+ * This array is NOT deallocated by destructor.
+*/
 math::MATRIX::MATRIX(m_index rows, m_index columns, const double* const matrixPointer) :
     rows(rows), 
     columns(columns),
     length(rows*columns),
     matrix((double*)matrixPointer),
     canDelete(false)
-{}
+{
+    #ifdef DEBUG
+    printf("CONSTRUCTED: %dx%d @ 0x%x (no alloc)\n", rows, columns, this);
+    #endif
+}
 
 /* Copy Constructor (allocates new memory and copies matrix; performs deep copy)
 The copy constructor invokes a deep copy. it creates a new matrix by copying
@@ -53,10 +63,10 @@ all the content of the other matrix and writing them into a new block of memory.
 math::MATRIX::MATRIX(const MATRIX& mat) : 
     rows(mat.rows),
     columns(mat.columns),
-    length(mat.length)
+    length(rows*columns)
 {
-    #if DEBUG
-    std::cout << "COPY" << std::endl;
+    #ifdef DEBUG
+    printf("COPY: %dx%d to 0x%x from 0x%x\n", rows, columns, this, &mat);
     #endif
     matrix = (length==0?nullptr:new double[length]);
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
@@ -71,8 +81,8 @@ regulate that (See move operator for more details). */
 math::MATRIX::~MATRIX(){
     if(canDelete) { 
         delete[] matrix;
-        #if DEBUG
-        std::cout << "DESTROYED" <<std::endl;
+        #ifdef DEBUG
+        printf("DESTROYED: %dx%d @ 0x%x\n", rows, columns, this);
         #endif
     }
 }
@@ -84,9 +94,6 @@ unsigned int math::MATRIX::getRows() const{ return rows; }
 
 // Get Columns
 unsigned int math::MATRIX::getColumns() const{ return columns; }
-
-// Get Length
-unsigned int math::MATRIX::getLength() const{ return length; }
 
 // Get Matrix
 const double* const math::MATRIX::getMatrix() const{ return matrix; }
@@ -126,9 +133,6 @@ double& math::MATRIX::operator()(m_index i, m_index j) const{
 /* Operator= (assign)
 Performs deep copy of entire matrix*/
 void math::MATRIX::operator=(const MATRIX& mat){
-    #if DEBUG
-    std::cout << "ASSIGN" << std::endl;
-    #endif
     /* If the two matrices do not have the
     same dimensions, deallocate this matrix,
     and allocate a new chunck of memory of
@@ -142,6 +146,9 @@ void math::MATRIX::operator=(const MATRIX& mat){
     }
     // Copy over the matrix
     for(int i = 0; i < length; i++) matrix[i] = mat.matrix[i];
+    #ifdef DEBUG
+    printf("ASSIGNED: %dx%d to 0x%x by 0x%x\n", rows, columns, this, &mat);
+    #endif
 }
 
 /* Operator= (move)
@@ -153,9 +160,6 @@ that the two objects are not of the same template
 type, then the entire thing is ran through a
 re-casting loop */
 void math::MATRIX::operator=(const MATRIX&& mat){
-    #if DEBUG
-    std::cout << "MOVE" << std::endl;
-    #endif
     rows = mat.rows;
     columns = mat.columns;
     length = mat.length;
@@ -167,6 +171,9 @@ void math::MATRIX::operator=(const MATRIX&& mat){
     going to assign the mat's matrix to this matrix */
     mat.canDelete = false;
     matrix = mat.matrix;             // Assign mat's matrix to this matrix
+    #ifdef DEBUG
+    printf("MOVE: %dx%d to 0x%x from 0x%x\n", rows, columns, this, &mat);
+    #endif
 }
 
 /* Operator+=
@@ -177,7 +184,7 @@ math::MATRIX& math::MATRIX::operator+=(const MATRIX& mat){
     if(rows != mat.rows || columns != mat.columns){
         throw DimensionException();
     }
-    for(int i = 0; i < length; i++) matrix[i] += mat.matrix[i];
+    for(int i = 0; i < rows*columns; i++) matrix[i] += mat.matrix[i];
     return (*this);
 }
 
@@ -189,18 +196,18 @@ math::MATRIX& math::MATRIX::operator-=(const MATRIX& mat){
     if(rows != mat.rows || columns != mat.columns){
         throw DimensionException();
     }
-    for(int i = 0; i < length; i++) matrix[i] -= mat.matrix[i];
+    for(int i = 0; i < rows*columns; i++) matrix[i] -= mat.matrix[i];
     return (*this);
 }
 
 // Operator*=
 math::MATRIX& math::MATRIX::operator*=(const double& c){
-    for(int i = 0; i < length; i++) matrix[i] *= c;
+    for(int i = 0; i < rows*columns; i++) matrix[i] *= c;
     return (*this);
 }
 
 math::MATRIX& math::MATRIX::operator/=(const double& c){
-    for(int i = 0; i < length; i++) matrix[i] /= c;
+    for(int i = 0; i < rows*columns; i++) matrix[i] /= c;
     return (*this);
 }
 
@@ -340,7 +347,6 @@ determinent(). Here is how it workd:
     > Add or Subtract that (depending on position) from det
     > return det
 */
-
 double math::MATRIX::det_rec(const MATRIX& mat) const{
     if(mat.rows == 2) return ((mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]));
     MATRIX mat2(mat.rows-1, mat.columns-1);
@@ -373,23 +379,41 @@ double math::MATRIX::determinant() const{
 
 extern void printMatrix(const math::MATRIX&, const char* message = "matrix");
 
+/* ref
+returns new matrix in row echelon form.
+It first declares the new matrix <refMat>
+and copies over the values. After that,
+two nested for-loops loop through the matrix
+and does row operations to get the result:
+outer loop: j=0; j < min(rows,columns), j++
+inner loop: i=0; i < rows; i++
+The outer loop essential points to the each
+pivot row while the inner loop goes through
+all the non-pivot rows below the pivot row,
+making the the respective entries 0.*/
 math::MATRIX math::MATRIX::ref() const{
     MATRIX refMat(rows, columns);
-    for(int i = 0; i < length; i++) refMat.matrix[i] = matrix[i];
-    double m;
+    for(int i = 0; i < length; i++) refMat.matrix[i] = matrix[i];   // Copy
+    double m;        // temporary variable used in row operation
     unsigned int condition = (rows<columns?rows:columns);
-    for(unsigned int j = 0; j < condition; j++){
-        if(refMat[j][j] == 0) continue;
-        for(unsigned int i = j+1; i < rows; i++){
-            if(refMat[i][j] == 0) continue;
-            m = refMat[i][j]/refMat[j][j];
-            refMat.rowop(i, j, [&](double& r1, double& r2){
+    for(unsigned int j = 0; j < condition; j++){        // loop: points to pivot row
+        if(refMat[j][j] == 0) continue;                     // Skip if pivot entry is 0
+        for(unsigned int i = j+1; i < rows; i++){           // loop: points to non pivot rows below the pivot row
+            if(refMat[i][j] == 0) continue;                     // skip if leading entry is already 0
+            m = refMat[i][j]/refMat[j][j];                      // m = <non_pivot_entry>/<pivot_entry> => used in row operation
+            refMat.rowop(i, j, [&](double& r1, double& r2){     // row operation (preserves the determinent)
                 r1 = (r1 - r2*m);});
         }
     }
     return refMat;
 }
 
+/*rref
+returns new matrix in reduce-row-echelon-form.
+It works quit similiar to ref(), but the only
+difference is that the inner loop goes through
+ALL non-pivot rows as opposed to only the one's
+below the pivot row. */
 math::MATRIX math::MATRIX::rref(MATRIX* inv, bool invFlag) const{
     if(rows!=columns){
         *inv = MATRIX();

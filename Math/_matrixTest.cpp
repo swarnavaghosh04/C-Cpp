@@ -35,8 +35,8 @@ int main(int argv, char** argc){
     double matArr[] = {1,9,2,1,2,3,3,6,5};
     double vectArr[] = {2,4,5};
 
-    const math::MATRIX mat = {3, 3, matArr};
-    const math::MATRIX vect = {3,1, vectArr};
+    const math::MATRIX mat(3, 3, matArr);
+    const math::MATRIX vect(3,1, vectArr);
 
     math::MATRIX invMat = mat.inverse();
 
@@ -51,5 +51,5 @@ int main(int argv, char** argc){
         std::cout << e.what() << std::endl;
     }
 
-    printf("\nDet = %.4f\n", mat.determinant());
+    printf("Det = %.4f\n", mat.determinant());
 }
