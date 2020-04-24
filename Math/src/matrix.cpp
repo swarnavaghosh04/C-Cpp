@@ -184,7 +184,7 @@ math::MATRIX& math::MATRIX::operator+=(const MATRIX& mat){
     if(rows != mat.rows || columns != mat.columns){
         throw DimensionException();
     }
-    for(int i = 0; i < rows*columns; i++) matrix[i] += mat.matrix[i];
+    for(int i = 0; i < length; i++) matrix[i] += mat.matrix[i];
     return (*this);
 }
 
@@ -196,22 +196,35 @@ math::MATRIX& math::MATRIX::operator-=(const MATRIX& mat){
     if(rows != mat.rows || columns != mat.columns){
         throw DimensionException();
     }
-    for(int i = 0; i < rows*columns; i++) matrix[i] -= mat.matrix[i];
+    for(int i = 0; i < length; i++) matrix[i] -= mat.matrix[i];
     return (*this);
 }
 
 // Operator*=
 math::MATRIX& math::MATRIX::operator*=(const double& c){
-    for(int i = 0; i < rows*columns; i++) matrix[i] *= c;
+    for(int i = 0; i < length; i++) matrix[i] *= c;
     return (*this);
 }
 
 math::MATRIX& math::MATRIX::operator/=(const double& c){
-    for(int i = 0; i < rows*columns; i++) matrix[i] /= c;
+    for(int i = 0; i < length; i++) matrix[i] /= c;
     return (*this);
 }
 
 // Arithmatic Operators =================
+
+void math::MATRIX::add(const MATRIX& mat1, const MATRIX& mat2, MATRIX& answer){
+    if(mat1.length!= mat2.length || mat2.rows!=mat1.rows) throw DimensionException();
+    if(answer.length!=mat1.length){
+        if(answer.canDelete) delete[] answer.matrix;
+        answer.matrix = new double[mat1.length];
+    }
+    answer.rows = mat1.rows;
+    answer.columns = mat1.columns;
+    answer.length = mat1.length;
+    for(int i = 0; i < answer.length; i++) answer.matrix[i] = mat1.matrix[i]+mat2.matrix[i];
+    return;
+}
 
 // Operator+
 math::MATRIX math::operator+(const MATRIX& m1, const MATRIX& m2) {

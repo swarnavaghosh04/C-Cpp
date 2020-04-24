@@ -72,6 +72,7 @@ namespace math{
             MATRIX& operator*=(const double&);              // Multiply scalar to self
             MATRIX& operator/=(const double&);              // Divide scalar to self
             // Arithmatic Operators ---------
+            static void add(const MATRIX&, const MATRIX&, MATRIX&);
             friend MATRIX operator+(const MATRIX&, const MATRIX&);    // Add matrices
             friend MATRIX operator-(const MATRIX&, const MATRIX&);    // Subtract matrices
             friend MATRIX operator*(const MATRIX&, const MATRIX&);    // Multiply matrices
