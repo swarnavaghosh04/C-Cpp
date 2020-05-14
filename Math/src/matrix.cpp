@@ -1,6 +1,5 @@
-#include ".\\matrix.hpp"
+#include ".\\headers\\matrix.hpp"
 #include <stdio.h>
-
 
 //#define DEBUG
 
@@ -213,19 +212,6 @@ math::MATRIX& math::MATRIX::operator/=(const double& c){
 
 // Arithmatic Operators =================
 
-void math::MATRIX::add(const MATRIX& mat1, const MATRIX& mat2, MATRIX& answer){
-    if(mat1.length!= mat2.length || mat2.rows!=mat1.rows) throw DimensionException();
-    if(answer.length!=mat1.length){
-        if(answer.canDelete) delete[] answer.matrix;
-        answer.matrix = new double[mat1.length];
-    }
-    answer.rows = mat1.rows;
-    answer.columns = mat1.columns;
-    answer.length = mat1.length;
-    for(int i = 0; i < answer.length; i++) answer.matrix[i] = mat1.matrix[i]+mat2.matrix[i];
-    return;
-}
-
 // Operator+
 math::MATRIX math::operator+(const MATRIX& m1, const MATRIX& m2) {
     
@@ -332,6 +318,8 @@ double& math::MATRIX::transposed(m_index i, m_index j) const{
     if(i >= columns || j >= rows) throw AccessViolationException();
     return matrix[j*columns + i];
 }
+
+double& math::MATRIX::_transposed(m_index i, m_index j) const {return matrix[j*columns+i];}
 
 /* transpose
 This function figures out the transpose

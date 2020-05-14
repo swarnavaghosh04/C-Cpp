@@ -72,7 +72,6 @@ namespace math{
             MATRIX& operator*=(const double&);              // Multiply scalar to self
             MATRIX& operator/=(const double&);              // Divide scalar to self
             // Arithmatic Operators ---------
-            static void add(const MATRIX&, const MATRIX&, MATRIX&);
             friend MATRIX operator+(const MATRIX&, const MATRIX&);    // Add matrices
             friend MATRIX operator-(const MATRIX&, const MATRIX&);    // Subtract matrices
             friend MATRIX operator*(const MATRIX&, const MATRIX&);    // Multiply matrices
@@ -85,6 +84,7 @@ namespace math{
             friend bool operator!=(const MATRIX&, const MATRIX&);     // Not Equals
             // Arithmatic functions ----------
             double& transposed(m_index, m_index) const;   // Pseudo Transpose
+            double& _transposed(m_index, m_index) const;  // Pseudo Tranpose Without Bounds Checking
             MATRIX transpose() const;                     // Returns new transposed matrix
             double determinant() const;                   // Returns determinent of matrix
             FUNCTION_TYPE void rowop(m_index, m_index, Function);
