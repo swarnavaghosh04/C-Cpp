@@ -1,4 +1,4 @@
-#include ".\\headers\\matrix.hpp"
+#include "../include/matrix.hpp"
 #include <stdio.h>
 
 //#define DEBUG
