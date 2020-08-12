@@ -2,7 +2,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "../include/fractions.hpp"
+#include <algorithm>
+#include <fractions.hpp>
 
 Math::Fraction::Fraction(int numerator, int denomenator) : 
 	numerator(numerator), 
@@ -13,4 +14,11 @@ std::string Math::Fraction::toString(int base){
 	std::stringstream str;
 	str << this->numerator << "/" << this->denomenator;
 	return str.str();
+}
+
+const Math::Fraction& Math::Fraction::reduce(){
+	int g = std::__gcd(numerator, denomenator);
+	numerator /= g;
+	denomenator /= g;
+	return *this;
 }
