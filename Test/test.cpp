@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
+#pragma comment(lib, "opengl32")
 
 int main(void)
 {
@@ -20,6 +21,8 @@ int main(void)
     glfwMakeContextCurrent(window);
 
     std::cout << glGetString(GL_VERSION) << std::endl;
+
+    
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
