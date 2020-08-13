@@ -4,8 +4,8 @@
 ================== By Swarnava Ghosh ===================
 */
 
-#ifndef LIB_MATRIX_H
-#define LIB_MATRIX_H
+#ifndef LIB_MATRIX_HPP
+#define LIB_MATRIX_HPP
 
 #include <iostream>
 #include <exception>
