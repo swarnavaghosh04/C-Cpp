@@ -13,9 +13,9 @@
 #define FUNCTION_TYPE template<typename Function>
 
 // Attrib Values =======================
-#define TRANSPOSED      (unsigned char)0b001
-#define UPPER_TRI       (unsigned char)0b010
-#define LOWER_TRI       (unsigned char)0b100
+#define TRANSPOSE       (unsigned char)0b001
+#define LOWER_TRI       (unsigned char)0b010
+#define UPPER_TRI       (unsigned char)0b100
 #define DIAGONAL        (unsigned char)0b110
 // =====================================
 
@@ -53,9 +53,9 @@ namespace math{
             unsigned int rows;                                  // Number of rows in the matrix
             unsigned int columns;                               // Number of columns in the matrix
             unsigned int length;                                // Number of rows x number of columns = total length of the matrix
+            unsigned char attrib;                               // Conveys information like transposed or upper triangular... (see "Attrib Values" section at the top)
             double* matrix;                                     // Pointer to the memory location where the actual matrix array is located
             mutable bool canDelete = true;                      // Specfies whether or not the matrix should be deallocated on destruction (this variable is only modified in the move constructor; it should always stay as true otherwise)
-            unsigned char attrib;                               // Conveys information like transposed or upper triangular... (see "Attrib Values" section at the top)
             double det_rec(const MATRIX&) const;                // The recursive function for finding determinent
         public:
             MATRIX(m_index = 0, m_index = 0);                   // Constructor (takes in length and width of matrix)
@@ -66,6 +66,7 @@ namespace math{
             unsigned int getRows() const;     	                // Returns the number of rows
             unsigned int getColumns() const;  	                // Returns the number of column
             unsigned int getLength() const;   	                // Returns the total length of the matrix (rows x columns)
+            unsigned char getAttrib() const;
             bool getCanDelete() const;                          // Returns the value of canDelete
             const double* const getMatrix() const;              // Returns the location of the matrix
             int getTransposedRows() const;
@@ -101,9 +102,10 @@ namespace math{
             MATRIX rref(MATRIX* = nullptr, bool = false) const;        // Returns new matrix in reduced-row-echelon form
             MATRIX inverse() const;                                    // Returns the inverse of the matrix
             // Other functions ------------
-            void setAttrib(unsigned char);                      // Sets attributes
-            void removeAttrib(unsigned char);                   // Removes attributes
-            bool checkAttrib(unsigned char);                    // Checks if specifed attrib is set
+            void setAttribs(unsigned char);                     // Sets attributes
+            void removeAttribs(unsigned char);                  // Removes attributes
+            void toggleAttribs(unsigned char);                  // Toggles attributes
+            bool checkAttribs(unsigned char) const;             // Checks if specifed attrib is set
             FUNCTION_TYPE void fill(Function);                  // Fills The matrix with a pattern based off of position
             void fill(const double&);                           // Fill the entire matrix with a single value
             static MATRIX identity(m_index, m_index=0);

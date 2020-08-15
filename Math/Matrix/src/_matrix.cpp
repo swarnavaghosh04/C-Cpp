@@ -64,7 +64,8 @@ all the content of the other matrix and writing them into a new block of memory.
 math::MATRIX::MATRIX(const MATRIX& mat) : 
     rows(mat.rows),
     columns(mat.columns),
-    length(rows*columns)
+    length(rows*columns),
+    attrib(mat.attrib)
 {
     #ifdef DEBUG
     printf("COPY: %dx%d to 0x%x from 0x%x\n", rows, columns, this, &mat);
@@ -95,6 +96,10 @@ unsigned int math::MATRIX::getRows() const{ return rows; }
 
 // Get Columns
 unsigned int math::MATRIX::getColumns() const{ return columns; }
+
+unsigned int math::MATRIX::getLength() const {return length; }
+
+unsigned char math::MATRIX::getAttrib() const{ return attrib; }
 
 // Get Matrix
 const double* const math::MATRIX::getMatrix() const{ return matrix; }
@@ -142,6 +147,7 @@ void math::MATRIX::operator=(const MATRIX& mat){
         rows = mat.rows;
         columns = mat.columns;
         length = mat.length;
+        attrib = mat.attrib;
         if(canDelete) delete[] matrix;
         matrix = (length==0?nullptr:new double[length]);
     }
@@ -164,6 +170,7 @@ void math::MATRIX::operator=(const MATRIX&& mat){
     rows = mat.rows;
     columns = mat.columns;
     length = mat.length;
+    attrib = mat.attrib;
     if(canDelete) delete[] matrix;   // Deallocate this matrix
     canDelete = mat.canDelete;       // Copy over delete flag
     /*since mat is going to get destroyed after the function
@@ -463,17 +470,21 @@ math::MATRIX math::MATRIX::inverse() const{
 
 /* Set Addtributes
 This function sets the attrib variable. */
-void math::MATRIX::setAttrib(unsigned char val){ attrib |= val; }
+void math::MATRIX::setAttribs(unsigned char val){ attrib |= val; }
 
 /* Remove Addtributes
 This function removes the attrib variable. */
-void math::MATRIX::removeAttrib(unsigned char val){ attrib &= ~val; }
+void math::MATRIX::removeAttribs(unsigned char val){ attrib &= ~val; }
+
+/* Toggle Addtributes
+This function toggles the attrib variable. */
+void math::MATRIX::toggleAttribs(unsigned char val){ attrib ^= val; }
 
 /* Check Attrbute
 This function checks if specified attribute is set or not.
 Returns true if set, else flase.
 */
-bool math::MATRIX::checkAttrib(unsigned char val){ return attrib & ~val ? false:true; }
+bool math::MATRIX::checkAttribs(unsigned char val) const { return ~attrib & val ? false:true; }
 
 /* Fill matrix - overload 2
 This is the second overloaded function of the previous
